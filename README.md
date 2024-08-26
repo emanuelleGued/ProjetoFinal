@@ -53,7 +53,7 @@ Dicas: procurem implementar uma aplicação de apelo social e, neste sentido, bu
 - **O trabalho deve ser feito em grupos entre cinco e seis pessoas cada, que serão distribuídos em reunião dia 26/08/2024**;
 - Criar uma branch no repositório com o formato grupo-número (Exemplo: grupo-1);
 - **O tema do trabalho e o esboço da arquitetura deverão estar publicados no github até dia 02/09/2024**;
-- **O grupo deverá fazer uma apresentação de protótipo (prova de conceito - PoC) em ensaio preliminar entre os dias 23 e 02/10/2024**;
+- **O grupo deverá fazer uma apresentação de protótipo (prova de conceito - PoC) em ensaio preliminar entre os dias 23/09/2024 e 02/10/2024**;
 - Subir o trabalho na branch com um README.md:
   - documentar detalhes sobre como a avaliação foi desenvolvida;
   - dificuldades conhecidas;
