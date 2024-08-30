@@ -1,63 +1,43 @@
-# Avaliação Sprints 9 e 10 - Projeto Final - Programa de Bolsas Compass UOL / AWS - turma maio/2024
+# Projeto de Chatbot para o Lar Cuidar
 
-Avaliação final do programa de bolsas Compass UOL para formação em machine learning para AWS.
+## Visão Geral
 
----
+Este projeto tem como objetivo desenvolver uma aplicação acessível e útil para o lar de idosos "Lar Cuidar". O foco principal é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, solicitar ajuda, e até mesmo contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
 
-## Execução
+## Objetivo do Projeto
 
-Deverá ser produzido um projeto final para apresentação pública até o último dia deste Programa de Bolsas.
+O principal objetivo deste projeto é fornecer uma ferramenta de fácil acesso para o lar de idosos, melhorando a comunicação e ajudando em casos de desaparecimento de moradores da região. Com a integração de diversas tecnologias AWS, espera-se criar uma solução eficaz e prática, alinhada com as necessidades da instituição e da comunidade.
 
-**Especificações**:
+## Arquitetura
 
-A equipe devevá:
+![alt text](assets/arquitetura.png)
 
-1 - Escolher uma aplicação prática para implementação e definir a arquitetura preliminar AWS até 02/09/2024;
+A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma experiência de usuário fluida e funcional:
 
-2 - A aplicação deverá contemplar, no mínimo, as seguintes ferramentas AWS:
+- **Amazon Lex**: Usado como o motor principal do chatbot, responsável por processar as mensagens dos usuários e determinar as intenções.
+- **AWS Lambda**: Função backend que processa as requisições do Lex e interage com outros serviços AWS para fornecer as respostas e ações necessárias.
+- **Amazon Polly**: Proporciona acessibilidade ao converter respostas de texto em áudio, especialmente útil para idosos com dificuldades de leitura.
+- **Amazon Rekognition**: Utilizado para comparar fotos de idosos desaparecidos com uma base de dados de imagens armazenadas, ajudando a identificar possíveis correspondências.
+- **Amazon Bedrock**: Integração com modelos de linguagem avançados para personalizar e contextualizar as respostas do chatbot, melhorando a interação com os usuários.
+- **Amazon S3**: Armazena as imagens dos idosos enviadas pelos usuários. As imagens são armazenadas com segurança e acessadas posteriormente para comparação.
+- **Amazon DynamoDB**: Armazena os metadados das imagens, como data de upload, nome da pessoa na foto e uma referência para o arquivo armazenado no S3, facilitando a busca e a comparação de imagens enviadas pelos usuários.
 
-- Transcribe e/ou Polly;
-- Rekognition;
-- Bedrock;
-- Lex;
-  
-3 - O canal do chatbot Lex deverá ser de uso público e permitir o envio de som e imagem.
+## Fluxo de Interação
 
-Dicas: procurem implementar uma aplicação de apelo social e, neste sentido, busquem contatos com organizações públicas (universidades, associações, etc.).
+1. **Usuários (idosos, cuidadores, comunidade)**: Enviam mensagens, fotos ou áudios através do canal de comunicação Slack.
+2. **Slack**: Recebe as mensagens dos usuários e as repassa para o Amazon Lex.
+3. **Amazon Lex**: Processa a mensagem, identifica a intenção e encaminha a solicitação para a função Lambda apropriada.
+4. **AWS Lambda**: Executa as ações necessárias, como chamar o Bedrock para personalizar respostas, ou o Rekognition para comparar imagens.
+5. **Amazon Polly**: Converte as respostas textuais em áudio, retornando ao Slack para que o usuário final possa ouvir as informações.
+6. **Amazon S3**: Armazena as imagens dos idosos enviadas pelos usuários, garantindo alta durabilidade e disponibilidade.
+7. **Amazon DynamoDB**: Armazena os metadados das imagens e a referência (URL ou chave) da imagem armazenada no S3, integrando-se com o Rekognition para verificar correspondências.
 
-***
+## Uso dos Serviços AWS
 
-## O que será avaliado
-
-- Praticidade de utilização;
-- Eficácia da aplicação;
-- Uso racional da arquitetura AWS;
-- Projeto em produção na AWS;
-- Códigos utilizados na implementação da arquitetura;
-- Prompt utilizado no Bedrock;
-- Se usado o modelo para treinamento/reconhecimento:
-  - Divisão dos dados para treino e teste, se utilizado treinamento;
-  - Taxa de assertividade aceitável (se o modelo está classificando corretamente);
-  - Entendimento da equipe sobre o modelo utilizado (saber explicar o que foi feito);
-  - Mostrar resposta do modelo para classificação;
-- Organização geral do código fonte:
-  - Estrutura de pastas;
-  - Divisão de responsabilidades em arquivos/pastas distintos;
-  - Otimização do código fonte (evitar duplicações de código);
-- Objetividade do README.md.
-
-***
-
-## Entrega
-
-- **O trabalho deve ser feito em grupos entre cinco e seis pessoas cada, que serão distribuídos em reunião dia 26/08/2024**;
-- Criar uma branch no repositório com o formato grupo-número (Exemplo: grupo-1);
-- **O tema do trabalho e o esboço da arquitetura deverão estar publicados no github até dia 02/09/2024**;
-- **O grupo deverá fazer uma apresentação de protótipo (prova de conceito - PoC) em ensaio preliminar entre os dias 23/09/2024 e 02/10/2024**;
-- Subir o trabalho na branch com um README.md:
-  - documentar detalhes sobre como a avaliação foi desenvolvida;
-  - dificuldades conhecidas;
-  - como utilizar o sistema;
-  - 🔨 código fonte desenvolvido (observar estruturas de pastas);
-- **Cada grupo deverá fazer uma apresentação do trabalho completo desenvolvido no dia 07/10/2024**;
-- **O prazo de entrega é até às 09h do dia 09/10/2024 no repositório do github** (https://github.com/Compass-pb-aws-2024-MAIO-A/sprints-9-10-pb-aws-maio).
+- **Amazon Lex**: Interpretação de linguagem natural para o chatbot.
+- **Amazon Polly**: Geração de áudio para respostas textuais.
+- **Amazon Rekognition**: Análise e comparação de imagens para identificação de idosos desaparecidos.
+- **Amazon Bedrock**: Personalização e contextualização de respostas do chatbot.
+- **AWS Lambda**: Lógica de backend e orquestração das chamadas de serviços AWS.
+- **Amazon S3**: Armazenamento seguro e escalável das imagens enviadas.
+- **Amazon DynamoDB**: Armazenamento de metadados das imagens e referência para o S3.
