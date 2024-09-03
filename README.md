@@ -2,7 +2,9 @@
 
 ## Visão Geral
 
-Este projeto tem como objetivo desenvolver uma aplicação acessível e útil para o lar de idosos "Lar Cuidar". O foco principal é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, solicitar ajuda, e até mesmo contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
+Este projeto tem como objetivo desenvolver uma aplicação acessível e útil para o lar de idosos "Lar Cuidar Família Santos" (LACFAS), localizado no Sítio Quebra-Pé, Esperança, PB. O LACFAS é uma organização sem fins lucrativos dedicada a acolher idosos a partir dos 60 anos, oferecendo assistência e cuidados adequados a essa faixa etária. A instituição segue as diretrizes da Política Nacional de Assistência Social, garantindo proteção integral, moradia, alimentação, e higiene para indivíduos que estão sem referência ou em situação de ameaça, violência, negligência ou abandono.
+
+O foco principal deste projeto é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, como fisioterapia, palestras, atividades físicas, artes, crochê, bordado e outras atividades artesanais. Além disso, o chatbot permitirá solicitar ajuda e contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
 
 ## Objetivo do Projeto
 
@@ -41,3 +43,49 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 - **AWS Lambda**: Lógica de backend e orquestração das chamadas de serviços AWS.
 - **Amazon S3**: Armazenamento seguro e escalável das imagens enviadas.
 - **Amazon DynamoDB**: Armazenamento de metadados das imagens e referência para o S3.
+
+## 👥 Contribuidores
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/estertrvs" title="GitHub">
+        <img src="https://avatars.githubusercontent.com/u/141650957?v=4" width="100px;" alt="Foto de Ester"/><br>
+        <sub>
+          <b>Ester Trevisan</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/emanuelleGued" title="GitHub">
+        <img src="https://avatars.githubusercontent.com/u/113402178?v=4" width="100px;" alt="Foto de Emanuelle"/><br>
+        <sub>
+          <b>Emanuelle Guedes</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/https-Luan-Fernandes" title="GitHub">
+        <img src="https://avatars.githubusercontent.com/u/146275377?v=4" width="100px;" alt="Foto de Luan"/><br>
+        <sub>
+          <b>Luan Fernandes</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/LuizManoeldev" title="GitHub">
+        <img src="https://avatars.githubusercontent.com/u/88911543?v=4" width="100px;" alt="Foto de Luiz"/><br>
+        <sub>
+          <b>Luiz Manoel</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SilasLeao" title="GitHub">
+        <img src="https://avatars.githubusercontent.com/u/89739174?v=4" width="100px;" alt="Foto de Silas"/><br>
+        <sub>
+          <b>Silas Leão</b>
+        </sub>
+      </a>
+    </td>
+  </tr>
+</table>
