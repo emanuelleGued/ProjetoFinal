@@ -49,9 +49,9 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
   <tr>
     <td align="center">
       <a href="https://github.com/estertrvs" title="GitHub">
-        <img src="https://avatars.githubusercontent.com/u/127947850?v=4" width="100px;" alt="Foto de Ester"/><br>
+        <img src="https://avatars.githubusercontent.com/u/141650957?v=4" width="100px;" alt="Foto de Ester"/><br>
         <sub>
-          <b>Ester Traves</b>
+          <b>Ester Trevisan</b>
         </sub>
       </a>
     </td>
@@ -65,7 +65,7 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
     </td>
     <td align="center">
       <a href="https://github.com/https-Luan-Fernandes" title="GitHub">
-        <img src="https://avatars.githubusercontent.com/u/124894596?v=4" width="100px;" alt="Foto de Luan"/><br>
+        <img src="https://avatars.githubusercontent.com/u/146275377?v=4" width="100px;" alt="Foto de Luan"/><br>
         <sub>
           <b>Luan Fernandes</b>
         </sub>
@@ -73,7 +73,7 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
     </td>
     <td align="center">
       <a href="https://github.com/LuizManoeldev" title="GitHub">
-        <img src="https://avatars.githubusercontent.com/u/128108790?v=4" width="100px;" alt="Foto de Luiz"/><br>
+        <img src="https://avatars.githubusercontent.com/u/88911543?v=4" width="100px;" alt="Foto de Luiz"/><br>
         <sub>
           <b>Luiz Manoel</b>
         </sub>
@@ -81,7 +81,7 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
     </td>
     <td align="center">
       <a href="https://github.com/SilasLeao" title="GitHub">
-        <img src="https://avatars.githubusercontent.com/u/134391110?v=4" width="100px;" alt="Foto de Silas"/><br>
+        <img src="https://avatars.githubusercontent.com/u/89739174?v=4" width="100px;" alt="Foto de Silas"/><br>
         <sub>
           <b>Silas Leão</b>
         </sub>
