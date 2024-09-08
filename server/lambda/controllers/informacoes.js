@@ -5,7 +5,7 @@ export const handleInformacoesIntent = async (event) => {
 
     try {
         // Verifica se a intenção é 'Informacoes'
-        if (event.currentIntent?.name === 'Informacoes') {
+        if (event.sessionState?.intent?.name === 'Informacoes') {
             // Verifica se o slot 'atividades' foi preenchido
             const atividadesSlot = event.currentIntent?.slots?.atividades?.value?.originalValue?.toLowerCase().trim();
 

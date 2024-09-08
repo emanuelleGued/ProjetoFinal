@@ -5,11 +5,12 @@ export const handleSaudacaoIntent = async (event) => {
 
     try {
         // Verifica se a intenção é 'Saudacao'
-        if (event.currentIntent?.name === 'Saudacao') {
+        if (event.sessionState?.intent?.name === 'Saudacao') {
             responseMessage = 'Olá, como podemos lhe ajudar?';
         } else {
             responseMessage = 'Desculpe, não entendi sua solicitação. Pode repetir, por favor?';
         }
+        
 
         // Retorna a resposta final
         return handleResponse(event, 'Close', null, responseMessage);
