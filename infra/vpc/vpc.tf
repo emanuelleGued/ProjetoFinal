@@ -35,14 +35,9 @@ resource "aws_route_table" "lacfas_public_route_table" {
   }
 }
 
-# Tabela de Roteamento Privada (usando NAT Gateway)
+# Tabela de Roteamento Privada (sem NAT Gateway)
 resource "aws_route_table" "lacfas_private_route_table" {
   vpc_id = aws_vpc.lacfas_vpc.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.lacfas_nat_gateway[0].id
-  }
 
   tags = {
     Name = "lacfas-private-route-table"
@@ -113,20 +108,24 @@ resource "aws_route_table_association" "lacfas_chatbot_route_assoc" {
   route_table_id = aws_route_table.lacfas_private_route_table.id
 }
 
-# Elastic IPs para cada NAT Gateway
-resource "aws_eip" "lacfas_nat_eip" {
-  count = length(var.availability_zones)
-  domain = "vpc"
+# VPC Endpoint para S3
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.lacfas_vpc.id
+  service_name = "com.amazonaws.${var.aws_region}.s3"
+  route_table_ids = [aws_route_table.lacfas_private_route_table.id]
+
+  tags = {
+    Name = "lacfas-s3-endpoint"
+  }
 }
 
-# NAT Gateways por AZ
-resource "aws_nat_gateway" "lacfas_nat_gateway" {
-  count = length(var.availability_zones)
-  
-  allocation_id = aws_eip.lacfas_nat_eip[count.index].id
-  subnet_id     = aws_subnet.lacfas_public_subnet[count.index].id
-  
+# VPC Endpoint para DynamoDB
+resource "aws_vpc_endpoint" "dynamodb" {
+  vpc_id       = aws_vpc.lacfas_vpc.id
+  service_name = "com.amazonaws.${var.aws_region}.dynamodb"
+  route_table_ids = [aws_route_table.lacfas_private_route_table.id]
+
   tags = {
-    Name = "lacfas-nat-gateway-${var.availability_zones[count.index]}"
+    Name = "lacfas-dynamodb-endpoint"
   }
 }
