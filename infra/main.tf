@@ -35,7 +35,7 @@ resource "aws_route_table" "lacfas_public_route_table" {
   }
 }
 
-# Tabela de Roteamento Privada (sem NAT Gateway)
+# Tabela de Roteamento Privada 
 resource "aws_route_table" "lacfas_private_route_table" {
   vpc_id = aws_vpc.lacfas_vpc.id
 
@@ -127,5 +127,67 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
   tags = {
     Name = "lacfas-dynamodb-endpoint"
+  }
+}
+
+# Security Group para Lambda de Desenvolvimento (Pública)
+resource "aws_security_group" "dev_lacfas_lambda_sg" {
+  vpc_id = aws_vpc.lacfas_vpc.id
+  name   = "dev-lacfas-lambda-sg"
+
+  # Regras de Egress (saída) - permitir saída para a Internet
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para qualquer destino (Internet) na porta 443 (HTTPS)
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para a Internet na porta 80 (HTTP)
+  }
+
+  # Boa prática: não definir regras de Ingress (entrada), já que a Lambda é invocada de dentro da AWS
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = []
+    description = "Nenhum tráfego de entrada é permitido, Lambda invocada internamente pela AWS"
+  }
+
+  tags = {
+    Name = "dev-lacfas-lambda-sg"
+  }
+}
+
+# Security Group para Lambda de Produção (Privada)
+resource "aws_security_group" "prod_lacfas_lambda_sg" {
+  vpc_id = aws_vpc.lacfas_vpc.id
+  name   = "prod-lacfas-lambda-sg"
+
+  # Regras de Egress (saída) - permitir saída para os VPC Endpoints (porta 443 para HTTPS)
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para a Internet (caso de exceção)
+    description = "Tráfego HTTPS para VPC Endpoints"
+  }
+
+  # Boa prática: não definir regras de Ingress (entrada), já que a Lambda é invocada de dentro da AWS
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = []
+    description = "Nenhum tráfego de entrada é permitido, Lambda invocada internamente pela AWS"
+  }
+
+  tags = {
+    Name = "prod-lacfas-lambda-sg"
   }
 }
