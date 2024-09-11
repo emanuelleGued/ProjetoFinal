@@ -1,3 +1,6 @@
+#######################   VPC    #######################
+
+
 # Variável para o nome da VPC
 variable "vpc_name" {
   description = "Nome da VPC"
@@ -57,3 +60,5 @@ variable "chatbot_subnet_names" {
   description = "Nomes para sub-redes privadas de Chatbot"
   type        = list(string)
 }
+
+#######################   VPC    #######################
