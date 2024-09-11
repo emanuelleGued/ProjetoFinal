@@ -3,6 +3,8 @@ provider "aws" {
   region = var.aws_region
 }
 
+#######################   VPC    #######################
+
 # Criação da VPC
 resource "aws_vpc" "lacfas_vpc" {
   cidr_block           = var.vpc_cidr
@@ -130,17 +132,50 @@ resource "aws_vpc_endpoint" "dynamodb" {
   }
 }
 
-# Security Group para Lambda de Desenvolvimento (Pública)
+
+#######################   VPC    #######################
+
+#######################   SEC GROUPS    #######################
+
+resource "aws_security_group" "prod_lacfas_lambda_sg" {
+  vpc_id = aws_vpc.lacfas_vpc.id
+  name   = "prod-lacfas-lambda-sg"
+
+  # Egress (Saída) - Permitir tráfego de saída para os VPC Endpoints (HTTPS)
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para qualquer destino (HTTPS)
+    description = "Allow HTTPS traffic to VPC Endpoints"
+  }
+
+  # Ingress (Entrada) - Nenhuma regra de entrada definida
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = []
+    description = "No ingress traffic allowed"
+  }
+
+  tags = {
+    Name = "prod-lacfas-lambda-sg"
+  }
+}
+
+
 resource "aws_security_group" "dev_lacfas_lambda_sg" {
   vpc_id = aws_vpc.lacfas_vpc.id
   name   = "dev-lacfas-lambda-sg"
 
-  # Regras de Egress (saída) - permitir saída para a Internet
+  # Egress (Saída) - Permitir tráfego de saída para a Internet (HTTPS)
   egress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para qualquer destino (Internet) na porta 443 (HTTPS)
+    description = "Allow HTTPS traffic to the Internet"
   }
 
   egress {
@@ -148,15 +183,16 @@ resource "aws_security_group" "dev_lacfas_lambda_sg" {
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para a Internet na porta 80 (HTTP)
+    description = "Allow HTTP traffic to the Internet"
   }
 
-  # Boa prática: não definir regras de Ingress (entrada), já que a Lambda é invocada de dentro da AWS
+  # Ingress (Entrada) - Nenhuma regra de entrada definida
   ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = []
-    description = "Nenhum tráfego de entrada é permitido, Lambda invocada internamente pela AWS"
+    description = "No ingress traffic allowed"
   }
 
   tags = {
@@ -164,30 +200,50 @@ resource "aws_security_group" "dev_lacfas_lambda_sg" {
   }
 }
 
-# Security Group para Lambda de Produção (Privada)
-resource "aws_security_group" "prod_lacfas_lambda_sg" {
-  vpc_id = aws_vpc.lacfas_vpc.id
-  name   = "prod-lacfas-lambda-sg"
 
-  # Regras de Egress (saída) - permitir saída para os VPC Endpoints (porta 443 para HTTPS)
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Permitir saída para a Internet (caso de exceção)
-    description = "Tráfego HTTPS para VPC Endpoints"
+#######################   SEC GROUPS    #######################
+
+#######################   BOT LAMBDAS    #######################
+
+resource "aws_lambda_function" "dev_lambda" {
+  function_name = "dev-lacfas-bot-function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  handler       = "index.handler"   # Defina o handler apropriado
+  runtime       = "nodejs14.x"      # Defina o runtime apropriado
+
+  # VPC Config: Lambda de desenvolvimento em subnet pública
+  vpc_config {
+    subnet_ids         = [aws_subnet.lacfas_public_subnet[0].id]  # Subnet pública
+    security_group_ids = [aws_security_group.dev_lacfas_lambda_sg.id]  # SG para Lambda pública
   }
 
-  # Boa prática: não definir regras de Ingress (entrada), já que a Lambda é invocada de dentro da AWS
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = []
-    description = "Nenhum tráfego de entrada é permitido, Lambda invocada internamente pela AWS"
-  }
+  # Código será adicionado manualmente, sem especificar via zip
+  # source_code_hash = null
+  # filename = null
 
   tags = {
-    Name = "prod-lacfas-lambda-sg"
+    Name = "dev-lacfas-lambda-function"
   }
 }
+
+resource "aws_lambda_function" "prod_lambda" {
+  function_name = "prod-lacfas-bot-function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  handler       = "index.handler"   # Defina o handler apropriado
+  runtime       = "nodejs14.x"      # Defina o runtime apropriado
+
+  # VPC Config: Lambda de produção em subnet privada
+  vpc_config {
+    subnet_ids         = [aws_subnet.lacfas_chatbot_subnet[0].id]  # Subnet privada
+    security_group_ids = [aws_security_group.prod_lacfas_lambda_sg.id]  # SG para Lambda privada
+  }
+
+  # Código será adicionado manualmente, sem especificar via zip
+  # source_code_hash = null
+  # filename = null
+
+  tags = {
+    Name = "prod-lacfas-lambda-function"
+  }
+}
+
