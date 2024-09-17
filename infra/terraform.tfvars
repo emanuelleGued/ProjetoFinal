@@ -17,3 +17,16 @@ chatbot_subnet_cidrs = ["10.0.5.0/24", "10.0.6.0/24"]
 chatbot_subnet_names = ["lacfas-chatbot-private-subnet-1a", "lacfas-chatbot-private-subnet-1b"]
 
 #######################   VPC    #######################
+
+#######################   LAMBDA FUNCTIONS    #######################
+
+# Nome das Lambdas
+lambda_dev_name = "dev-lacfas-bot-function"
+lambda_prod_name = "prod-lacfas-bot-function"
+
+# Nomes dos Security Groups
+dev_lambda_sg_name = "dev-lacfas-lambda-sg"
+prod_lambda_sg_name = "prod-lacfas-lambda-sg"
+
+
+#######################   LAMBDA FUNCTIONS    #######################

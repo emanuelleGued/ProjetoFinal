@@ -62,3 +62,36 @@ variable "chatbot_subnet_names" {
 }
 
 #######################   VPC    #######################
+
+#######################   LAMBDA FUNCTIONS    #######################
+
+# Nome da Lambda de Desenvolvimento
+variable "lambda_dev_name" {
+  description = "Nome da Lambda de Desenvolvimento"
+  type        = string
+  default     = "dev-lacfas-bot-function"
+}
+
+# Nome da Lambda de Produção
+variable "lambda_prod_name" {
+  description = "Nome da Lambda de Produção"
+  type        = string
+  default     = "prod-lacfas-bot-function"
+}
+
+# Nome do Security Group para Lambda de Desenvolvimento
+variable "dev_lambda_sg_name" {
+  description = "Nome do Security Group da Lambda de Desenvolvimento"
+  type        = string
+  default     = "dev-lacfas-lambda-sg"
+}
+
+# Nome do Security Group para Lambda de Produção
+variable "prod_lambda_sg_name" {
+  description = "Nome do Security Group da Lambda de Produção"
+  type        = string
+  default     = "prod-lacfas-lambda-sg"
+}
+
+
+#######################   LAMBDA FUNCTIONS    #######################
