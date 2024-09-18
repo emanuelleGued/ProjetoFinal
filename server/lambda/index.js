@@ -2,6 +2,7 @@ import { handleResponse } from './utils/response-builder.js';
 import { handleFallbackIntent } from './controllers/fallback.js'
 import { handleSaudacaoIntent } from './controllers/saudacao.js';
 import { handleInformacoesIntent } from './controllers/informacoes.js';
+import { handleDoacaoIntent } from './controllers/doacao.js';
 
 
 export const handler = async (event) => {
@@ -12,7 +13,7 @@ export const handler = async (event) => {
 
     // Encontra a interpretação com a maior confiança acima do mínimo de 0.85
     const highConfidenceInterpretation = event.interpretations.find(
-        interpretation => interpretation.nluConfidence && interpretation.nluConfidence >= 0.85
+        interpretation => interpretation.nluConfidence && interpretation.nluConfidence >= 0.80
     );
 
     if (!highConfidenceInterpretation) {
@@ -27,6 +28,8 @@ export const handler = async (event) => {
             return await handleSaudacaoIntent(event);
         case 'Informacoes':
             return await handleInformacoesIntent(event);
+        case 'FazerDoacao':
+            return await handleDoacaoIntent(event);
         default:
             return handleResponse(event, 'Close', null, 'Desculpe, não consegui processar a sua solicitação.');
     }
