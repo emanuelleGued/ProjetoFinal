@@ -1,0 +1,63 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: emanuelle
+service: api-tts
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  profile: ${env:PROFILE_NAME, 'default'}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:GetObject"
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::${env:S3_BUCKET_NAME}/*"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource: "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${env:DYNAMODB_TABLE}"
+    - Effect: "Allow"
+      Action:
+        - "polly:SynthesizeSpeech"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "comprehend:DetectDominantLanguage"
+      Resource: "*"
+  environment:
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+    DYNAMODB_TABLE: ${env:DYNAMODB_TABLE}
+  deploymentBucket:
+    name: ${env:S3_BUCKET_NAME} 
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+
+functions:
+  health:
+    name: lacfas-health-function
+    handler: handler.health
+    events:
+      - httpApi:
+          path: /
+          method: get
+  v1Description:
+    name: lacfas-v1-description-function 
+    handler: handler.v1_description
+    events:
+      - httpApi:
+          path: /v1
+          method: get
+  v1_tts:
+    name: lacfas-v1-tts-function 
+    handler: post.lambda_handler
+    events:
+      - httpApi:
+          path: /v1/tts
+          method: post
