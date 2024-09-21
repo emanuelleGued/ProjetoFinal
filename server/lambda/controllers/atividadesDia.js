@@ -1,4 +1,5 @@
 import { handleResponse } from "../utils/response-builder.js";
+import { generateTTS } from "../utils/generate-tts.js"; // Importando a função TTS
 
 export const handleAtividadesDiaIntent = async (event) => {
   let responseMessage = "";
@@ -8,8 +9,6 @@ export const handleAtividadesDiaIntent = async (event) => {
     if (event.sessionState?.intent?.name === "AtividadesDia") {
       const today = new Date();
       const dayOfWeek = today.getDay(); // Retorna 0 (Domingo) a 6 (Sábado)
-
-      let responseMessage = "";
 
       // Define a mensagem conforme o dia da semana
       switch (dayOfWeek) {
@@ -45,8 +44,16 @@ export const handleAtividadesDiaIntent = async (event) => {
           responseMessage = "Nenhuma atividade agendada para hoje.";
       }
 
-      // Retorna a resposta final
-      return handleResponse(event, "Close", null, responseMessage);
+      // Gera o áudio da resposta
+      try {
+        const audioUrl = await generateTTS(responseMessage);
+
+        return handleResponse(event, 'Close', null, [responseMessage, audioUrl]);
+      } catch (error) {
+        console.log(error);
+
+        return handleResponse(event, 'Close', null, 'Ocorreu um problema ao gerar o áudio da resposta.');
+      }
     }
   } catch (error) {
     // Retorna a resposta final em caso de erro no processamento
