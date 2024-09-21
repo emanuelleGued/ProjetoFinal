@@ -3,6 +3,8 @@ import { handleFallbackIntent } from "./controllers/fallback.js";
 import { handleSaudacaoIntent } from "./controllers/saudacao.js";
 import { handleAtividadesDiaIntent } from "./controllers/atividadesDia.js";
 import { handleDoacaoIntent } from "./controllers/doacao.js";
+import { handleVisitasIntent } from "./controllers/visitas.js";
+import { handleCadastroIntent } from "./controllers/cadastro.js";
 
 export const handler = async (event) => {
   // Verifica se `interpretations` existe e é um array
@@ -30,6 +32,10 @@ export const handler = async (event) => {
       return await handleAtividadesDiaIntent(event);
     case "FazerDoacao":
       return await handleDoacaoIntent(event);
+    case "Cadastro":
+      return await handleCadastroIntent(event);
+    case "Visitas":
+      return await handleVisitasIntent(event);
     default:
       return handleResponse(
         event,
