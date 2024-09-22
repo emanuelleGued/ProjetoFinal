@@ -1,6 +1,7 @@
 import { handleResponse } from '../utils/response-builder.js';
 import { generateTTS } from '../utils/generate-tts.js';
-import { validateSlots } from '../utils/validation.js';
+import { validateSlots } from '../utils/validations.js';
+
 
 export const handleCadastroVoluntarioIntent = async (event) => {
     let responseMessage = "";
