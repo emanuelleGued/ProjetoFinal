@@ -11,13 +11,19 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.654.0",
+    "@aws-sdk/credential-providers": "^3.654.0",
+    "@aws-sdk/util-dynamodb": "^3.656.0",
+    "aws-sdk": "^2.1691.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
     "nodemon": "^3.1.4",
-    "server": "file:"
-  }
+    "server": "file:",
+    "sharp": "^0.33.5"
+  },
+  "description": ""
 }
