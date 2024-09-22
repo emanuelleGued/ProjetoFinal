@@ -6,6 +6,7 @@ import { handleDoacaoIntent } from "./controllers/doacao.js";
 import { handleVisitasIntent } from "./controllers/visitas.js";
 import { handleCadastroIntent } from "./controllers/cadastro.js";
 import { handleCadastroVoluntarioIntent } from "./controllers/cadastroVoluntario.js";
+import { handleEscolherCadastroIntent } from "./controllers/escolherCadastro.js";
 
 export const handler = async (event) => {
   // Verifica se `interpretations` existe e é um array
@@ -39,6 +40,8 @@ export const handler = async (event) => {
       return await handleVisitasIntent(event);
     case "CadastroVoluntario":
       return await handleCadastroVoluntarioIntent(event);
+    case "EscolherCadastro":
+      return await handleEscolherCadastroIntent(event);
     default:
       return handleResponse(
         event,
