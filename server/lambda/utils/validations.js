@@ -5,7 +5,7 @@ export const validateSlots = (slots) => {
         { key: 'CPF1', message: 'Digite seu CPF:' },
         { key: 'EmissaoRG', message: 'Qual é a data de emissão do seu RG?' },
         { key: 'DataNascimento', message: 'Qual a sua data de nascimento?' },
-        { key: 'Endereco', message: 'Qual é o seu endereço?' },
+        { key: 'Endereco1', message: 'Qual é o seu endereço?' },
         { key: 'Bairro', message: 'Qual é o seu bairro?' },
         { key: 'TelefoneCelular', message: 'Qual é o seu telefone celular?' },
         { key: 'Email', message: 'Me informe um e-mail para contato.' },
