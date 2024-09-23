@@ -1,19 +1,19 @@
-# Projeto de Chatbot para o Lar Cuidar
+# 🤖👴 Projeto de Chatbot para o Lar Cuidar
 
-## Visão Geral
+## 🌍 Visão Geral
 
 Este projeto tem como objetivo desenvolver uma aplicação acessível e útil para o lar de idosos "Lar Cuidar Família Santos" (LACFAS), localizado no Sítio Quebra-Pé, Esperança, PB. O LACFAS é uma organização sem fins lucrativos dedicada a acolher idosos a partir dos 60 anos, oferecendo assistência e cuidados adequados a essa faixa etária. A instituição segue as diretrizes da Política Nacional de Assistência Social, garantindo proteção integral, moradia, alimentação, e higiene para indivíduos que estão sem referência ou em situação de ameaça, violência, negligência ou abandono.
 
 O foco principal deste projeto é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, como fisioterapia, palestras, atividades físicas, artes, crochê, bordado e outras atividades artesanais. Além disso, o chatbot permitirá solicitar ajuda e contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
 
-## Funcionalidades
+## 🚀 Funcionalidades
 
 - Saber as atividades que irão acontecer em determinado dia no lar;
 - Realizar uma doação via pix ou de alimentos e itens;
 - Se cadastrar como voluntário para ajudar o lar em atividades;
 - Cadastrar idosos que querem receber uma visita em sua casa.
 
-## Arquitetura
+## 🔧 Arquitetura
 
 ![alt text](assets/arquitetura.png)
 
@@ -27,7 +27,7 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 - **Amazon S3**: Armazena os áudios gerados pela API com Polly.
 - **Amazon DynamoDB**: Armazena hashcode único dos áudios gerados pela API com o Polly e, em outra tabela, dados do cadastro de voluntários.
 
-## Fluxo de Interação
+## 🔄 Fluxo de Interação
 
 1. **Usuários (idosos, cuidadores, comunidade)**: Enviam mensagens, fotos ou áudios através do canal de comunicação Slack.
 2. **Slack**: Recebe as mensagens dos usuários e as repassa para o Amazon Lex.
@@ -35,9 +35,9 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 4. **AWS Lambda**: Executa as ações necessárias, como chamar o Bedrock para personalizar respostas, ou o Rekognition para comparar imagens.
 5. **Amazon Polly**: Converte as respostas textuais em áudio, retornando ao Slack para que o usuário final possa ouvir as informações.
 6. **Amazon S3**: Armazena áudios do Polly.
-7. **Amazon DynamoDB**: Armazena hashcode dos áudios e também dados da intent de cadastro de voluntários.
+7. **Amazon DynamoDB**: Armazena hashcode dos áudios e também dados da intent de cadastro de idosos e de voluntários.
 
-## Uso dos Serviços AWS
+## 🛠 Uso dos Serviços AWS
 
 - **Amazon Lex**: Interpretação de linguagem natural para o chatbot.
 - **Amazon Polly**: Geração de áudio para respostas textuais.
@@ -45,7 +45,7 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 - **Amazon Bedrock**: Personalização e contextualização de respostas do chatbot.
 - **AWS Lambda**: Lógica de backend e orquestração das chamadas de serviços AWS.
 - **Amazon S3**: Armazenamento de áudios do Polly.
-- **Amazon DynamoDB**: Armazenamento de dados dos áudios e do cadastro de voluntários.
+- **Amazon DynamoDB**: Armazenamento de dados dos áudios e do cadastro de idosos e de voluntários.
 
 ## 👥 Contribuidores
 <table>
