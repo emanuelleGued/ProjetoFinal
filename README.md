@@ -6,9 +6,12 @@ Este projeto tem como objetivo desenvolver uma aplicação acessível e útil pa
 
 O foco principal deste projeto é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, como fisioterapia, palestras, atividades físicas, artes, crochê, bordado e outras atividades artesanais. Além disso, o chatbot permitirá solicitar ajuda e contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
 
-## Objetivo do Projeto
+## Funcionalidades
 
-O principal objetivo deste projeto é fornecer uma ferramenta de fácil acesso para o lar de idosos, melhorando a comunicação e ajudando em casos de desaparecimento de moradores da região. Com a integração de diversas tecnologias AWS, espera-se criar uma solução eficaz e prática, alinhada com as necessidades da instituição e da comunidade.
+- Saber as atividades que irão acontecer em determinado dia no lar;
+- Realizar uma doação via pix ou de alimentos e itens;
+- Se cadastrar como voluntário para ajudar o lar em atividades;
+- Cadastrar idosos que querem receber uma visita em sua casa.
 
 ## Arquitetura
 
@@ -19,10 +22,10 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 - **Amazon Lex**: Usado como o motor principal do chatbot, responsável por processar as mensagens dos usuários e determinar as intenções.
 - **AWS Lambda**: Função backend que processa as requisições do Lex e interage com outros serviços AWS para fornecer as respostas e ações necessárias.
 - **Amazon Polly**: Proporciona acessibilidade ao converter respostas de texto em áudio, especialmente útil para idosos com dificuldades de leitura.
-- **Amazon Rekognition**: Utilizado para comparar fotos de idosos desaparecidos com uma base de dados de imagens armazenadas, ajudando a identificar possíveis correspondências.
+- **Amazon Rekognition**: Utilizado para receber fotos de comprovantes de transferências Pix e validar informações.
 - **Amazon Bedrock**: Integração com modelos de linguagem avançados para personalizar e contextualizar as respostas do chatbot, melhorando a interação com os usuários.
-- **Amazon S3**: Armazena as imagens dos idosos enviadas pelos usuários. As imagens são armazenadas com segurança e acessadas posteriormente para comparação.
-- **Amazon DynamoDB**: Armazena os metadados das imagens, como data de upload, nome da pessoa na foto e uma referência para o arquivo armazenado no S3, facilitando a busca e a comparação de imagens enviadas pelos usuários.
+- **Amazon S3**: Armazena os áudios gerados pela API com Polly.
+- **Amazon DynamoDB**: Armazena hashcode único dos áudios gerados pela API com o Polly e, em outra tabela, dados do cadastro de voluntários.
 
 ## Fluxo de Interação
 
@@ -31,18 +34,18 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 3. **Amazon Lex**: Processa a mensagem, identifica a intenção e encaminha a solicitação para a função Lambda apropriada.
 4. **AWS Lambda**: Executa as ações necessárias, como chamar o Bedrock para personalizar respostas, ou o Rekognition para comparar imagens.
 5. **Amazon Polly**: Converte as respostas textuais em áudio, retornando ao Slack para que o usuário final possa ouvir as informações.
-6. **Amazon S3**: Armazena as imagens dos idosos enviadas pelos usuários, garantindo alta durabilidade e disponibilidade.
-7. **Amazon DynamoDB**: Armazena os metadados das imagens e a referência (URL ou chave) da imagem armazenada no S3, integrando-se com o Rekognition para verificar correspondências.
+6. **Amazon S3**: Armazena áudios do Polly.
+7. **Amazon DynamoDB**: Armazena hashcode dos áudios e também dados da intent de cadastro de voluntários.
 
 ## Uso dos Serviços AWS
 
 - **Amazon Lex**: Interpretação de linguagem natural para o chatbot.
 - **Amazon Polly**: Geração de áudio para respostas textuais.
-- **Amazon Rekognition**: Análise e comparação de imagens para identificação de idosos desaparecidos.
+- **Amazon Rekognition**: Análise e validação de comprovante de doação.
 - **Amazon Bedrock**: Personalização e contextualização de respostas do chatbot.
 - **AWS Lambda**: Lógica de backend e orquestração das chamadas de serviços AWS.
-- **Amazon S3**: Armazenamento seguro e escalável das imagens enviadas.
-- **Amazon DynamoDB**: Armazenamento de metadados das imagens e referência para o S3.
+- **Amazon S3**: Armazenamento de áudios do Polly.
+- **Amazon DynamoDB**: Armazenamento de dados dos áudios e do cadastro de voluntários.
 
 ## 👥 Contribuidores
 <table>
