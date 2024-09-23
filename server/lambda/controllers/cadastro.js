@@ -1,15 +1,25 @@
 import { handleResponse } from '../utils/response-builder.js';
 import { generateTTS } from '../utils/generate-tts.js';
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const handleCadastroIntent = async (event) => {
     let responseMessage = "";
 
     try {
+        const slots = event.sessionState.intent.slots;
+
+        // Verificação da existência dos slots
+        if (!slots) {
+            return handleResponse(event, 'Failed', null, 'Nenhum slot encontrado.');
+        }
+
         const {
             Nome, cpf, DataNascimento, Email, Endereco,
             Escolaridade, EstadoCivil, Genero, Naturalidade, Profissao,
             telefone, dataExpedicao, orgaoExpedidor, rg, uf, CondicaoMedica, Acompanhamento
-        } = event.sessionState.intent.slots;
+        } = slots;
 
         // Verificação do nome
         if (Nome && Nome.value) {
@@ -48,7 +58,7 @@ export const handleCadastroIntent = async (event) => {
             let naturalidadeSlot = Naturalidade.value.originalValue.trim();
             responseMessage += `Naturalidade: ${naturalidadeSlot}. `;
         } else {
-            return handleResponse(event, 'ElicitSlot', 'Naturalidade', 'Qual é a cidade da nascimento?');
+            return handleResponse(event, 'ElicitSlot', 'Naturalidade', 'Qual é a cidade de nascimento?');
         }
 
         // Verificação da escolaridade
@@ -147,16 +157,36 @@ export const handleCadastroIntent = async (event) => {
             return handleResponse(event, 'ElicitSlot', 'Acompanhamento', 'Tem algum acompanhamento?');
         }
 
-        // Gerar áudio da resposta final
-        try {
-            const audioUrl = await generateTTS(responseMessage);
+        // Criar objeto de dados do idoso
+        const idosoData = {
+            PK: `idoso#${cpf.value.originalValue.trim()}`, // Definindo a chave primária
+            Nome: Nome.value.originalValue.trim(),
+            DataNascimento: DataNascimento.value.originalValue.trim(),
+            Email: Email.value.originalValue.trim(),
+            Endereco: Endereco.value.originalValue.trim(),
+            Escolaridade: Escolaridade.value.originalValue.trim(),
+            EstadoCivil: EstadoCivil.value.originalValue.trim(),
+            Genero: Genero.value.originalValue.trim(),
+            Naturalidade: Naturalidade.value.originalValue.trim(),
+            Profissao: Profissao.value.originalValue.trim(),
+            Telefone: telefone.value.originalValue.trim(),
+            DataExpedicao: dataExpedicao.value.originalValue.trim(),
+            OrgaoExpedidor: orgaoExpedidor.value.originalValue.trim(),
+            RG: rg.value.originalValue.trim(),
+            UF: uf.value.originalValue.trim(),
+            CondicaoMedica: CondicaoMedica.value.originalValue.trim(),
+            Acompanhamento: Acompanhamento.value.originalValue.trim(),
+        };
 
-            // Retornar a resposta final com o áudio
-            return handleResponse(event, 'Close', null, [responseMessage, audioUrl]);
-        } catch (error) {
-            console.log(error);
-            return handleResponse(event, 'Close', null, 'Ocorreu um problema ao gerar o áudio da resposta.');
-        }
+        // Persistir dados no DynamoDB
+        await axios.post(`${process.env.ENDPOINT}/cadastrar_idoso`, idosoData);
+
+        // Gerar áudio da resposta final
+        const audioUrl = await generateTTS(responseMessage);
+
+        // Retornar a resposta final com o áudio
+        return handleResponse(event, 'Close', null, [responseMessage, audioUrl]);
+
     } catch (error) {
         console.log(error);
         return handleResponse(event, 'Failed', null, 'Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.');

@@ -18,7 +18,10 @@ provider:
         - "dynamodb:GetItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
-      Resource: "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${env:DYNAMODB_TABLE}"
+      Resource: 
+        - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/CadastroIdosos"
+        - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/CadastroVoluntarios"
+        - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${env:DYNAMODB_TABLE}"
     - Effect: "Allow"
       Action:
         - "polly:SynthesizeSpeech"
@@ -36,6 +39,34 @@ provider:
 plugins:
   - serverless-python-requirements
   - serverless-dotenv-plugin
+
+resources:
+  Resources:
+    # Tabela de Cadastro de Idosos
+    CadastroIdosos:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "CadastroIdosos"
+        AttributeDefinitions:
+          - AttributeName: "PK"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "PK"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+
+    # Tabela de Cadastro de Voluntários
+    CadastroVoluntarios:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "CadastroVoluntarios"
+        AttributeDefinitions:
+          - AttributeName: "PK"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "PK"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
 
 functions:
   health:
@@ -58,4 +89,18 @@ functions:
     events:
       - httpApi:
           path: /v1/tts
+          method: post
+
+  cadastrarIdoso:
+    handler: handler.persist_idoso
+    events:
+      - httpApi:
+          path: /cadastrar_idoso
+          method: post
+
+  cadastrarVoluntario:
+    handler: handler.persist_voluntario
+    events:
+      - httpApi:
+          path: /cadastrar_voluntario
           method: post
