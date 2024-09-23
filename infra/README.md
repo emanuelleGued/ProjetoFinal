@@ -11,56 +11,66 @@
 
 ## Descrição da Infraestrutura
 
-A infraestrutura de subnets para a **VPC lacfas-vpc** foi projetada para garantir alta disponibilidade, segurança e escalabilidade dentro da região **us-east-1**. O objetivo é fornecer uma rede segura e resiliente que suporte diferentes tipos de recursos, como funções Lambda, banco de dados e endpoints AWS, com isolamento adequado e comunicação eficiente via **VPC Endpoints**.
+A infraestrutura da **VPC lacfas-vpc** foi projetada para oferecer uma rede segura, resiliente e escalável dentro da região **us-east-1**, atendendo aos requisitos de isolamento de recursos e alta disponibilidade. Ela permite comunicação eficiente entre serviços AWS via **VPC Endpoints**, protegendo o tráfego com **Security Groups** e **NACLs**.
 
 ### 1. VPC (Virtual Private Cloud)
 
-A **VPC (lacfas-vpc)** foi criada com o bloco CIDR `10.0.0.0/16`, permitindo a subdivisão desse bloco em várias sub-redes para hospedar diferentes recursos e serviços. A VPC isola a infraestrutura de rede, proporcionando controle total sobre roteamento, gateways de rede e segurança.
+A **VPC (lacfas-vpc)** foi criada com o bloco CIDR `10.0.0.0/16` e é subdividida em várias sub-redes, públicas e privadas, para hospedar recursos como funções Lambda, serviços do chatbot e banco de dados, garantindo controle total sobre o roteamento e segurança.
 
 ### 2. Sub-redes Públicas
 
-As sub-redes públicas foram criadas em múltiplas Zonas de Disponibilidade (AZs), permitindo que recursos voltados para a Internet, como funções Lambda de desenvolvimento, possam ser acessados publicamente.
+As sub-redes públicas são usadas para hospedar recursos que precisam de acesso direto à Internet, como as funções Lambda de desenvolvimento.
 
-- **lacfas-public-subnet-1a**: Sub-rede pública na zona **us-east-1a**, com o bloco CIDR `10.0.1.0/24`.
-- **lacfas-public-subnet-1b**: Sub-rede pública na zona **us-east-1b**, com o bloco CIDR `10.0.2.0/24`.
+- **lacfas-public-subnet-1a**: Sub-rede pública na zona **us-east-1a**, CIDR `10.0.1.0/24`.
+- **lacfas-public-subnet-1b**: Sub-rede pública na zona **us-east-1b**, CIDR `10.0.2.0/24`.
 
-Essas sub-redes estão associadas a um **Internet Gateway (IGW)**, permitindo acesso direto à Internet para os recursos públicos.
+Essas sub-redes estão conectadas a um **Internet Gateway (IGW)** para permitir o acesso à Internet.
 
 ### 3. Sub-redes Privadas
 
-As sub-redes privadas hospedam recursos críticos que não precisam de acesso direto à Internet. Em vez de **NAT Gateways**, a infraestrutura usa **VPC Endpoints** para permitir que as instâncias dentro dessas sub-redes façam chamadas seguras para serviços AWS, como S3, Polly, Rekognition, DynamoDB e Bedrock.
+As sub-redes privadas hospedam recursos críticos que não precisam de acesso direto à Internet, utilizando **VPC Endpoints** para acessar serviços AWS como S3, Polly, Rekognition, DynamoDB e Bedrock, sem a necessidade de um NAT Gateway.
 
-- **lacfas-database-private-subnet-1a**: Sub-rede privada para banco de dados na zona **us-east-1a**, com o bloco CIDR `10.0.3.0/24`.
-- **lacfas-database-private-subnet-1b**: Sub-rede privada para banco de dados na zona **us-east-1b**, com o bloco CIDR `10.0.4.0/24`.
-- **lacfas-chatbot-private-subnet-1a**: Sub-rede privada para os serviços do chatbot na zona **us-east-1a**, com o bloco CIDR `10.0.5.0/24`.
-- **lacfas-chatbot-private-subnet-1b**: Sub-rede privada para os serviços do chatbot na zona **us-east-1b**, com o bloco CIDR `10.0.6.0/24`.
-
-Essas sub-redes foram projetadas para isolar serviços sensíveis e proporcionar alta disponibilidade com resiliência.
+- **lacfas-database-private-subnet-1a**: Sub-rede privada para banco de dados na zona **us-east-1a**, CIDR `10.0.3.0/24`.
+- **lacfas-database-private-subnet-1b**: Sub-rede privada para banco de dados na zona **us-east-1b**, CIDR `10.0.4.0/24`.
+- **lacfas-chatbot-private-subnet-1a**: Sub-rede privada para o chatbot na zona **us-east-1a**, CIDR `10.0.5.0/24`.
+- **lacfas-chatbot-private-subnet-1b**: Sub-rede privada para o chatbot na zona **us-east-1b**, CIDR `10.0.6.0/24`.
 
 ### 4. Gateways e Roteamento
 
-- **Internet Gateway (IGW)**: Permite que os recursos das sub-redes públicas acessem a Internet diretamente.
-- **VPC Endpoints**: As sub-redes privadas utilizam **VPC Endpoints** para acessar serviços AWS (S3, DynamoDB, Polly, Rekognition e Bedrock) sem necessidade de **NAT Gateways**, o que reduz custos e melhora a segurança.
-- **Tabelas de Roteamento**: O tráfego das sub-redes públicas é roteado para o IGW, enquanto as sub-redes privadas são roteadas para os VPC Endpoints.
+- **Internet Gateway (IGW)**: Permite que os recursos nas sub-redes públicas acessem a Internet.
+- **VPC Endpoints**: São usados nas sub-redes privadas para acessar serviços AWS como S3, DynamoDB, Polly, Rekognition e Bedrock, sem precisar de NAT Gateways, o que reduz custos e melhora a segurança.
+- **Tabelas de Roteamento**: As tabelas de roteamento são configuradas para que o tráfego das sub-redes públicas passe pelo IGW, e o tráfego das sub-redes privadas use os **VPC Endpoints**.
 
-### 5. Alta Disponibilidade e Resiliência
+### 5. Security Groups (Grupos de Segurança)
 
-Com a utilização de **múltiplas Zonas de Disponibilidade (AZs)**, a infraestrutura garante que os serviços estejam sempre disponíveis, mesmo em caso de falha em uma das zonas. Os recursos críticos são replicados em duas zonas, garantindo **alta disponibilidade** e **tolerância a falhas**.
+- **dev-lacfas-lambda-sg**: Permite que a função Lambda de desenvolvimento acesse a Internet via HTTP (porta 80) e HTTPS (porta 443), garantindo segurança nas comunicações.
+- **prod-lacfas-lambda-sg**: Permite que a função Lambda de produção acesse serviços AWS (via HTTPS) através dos VPC Endpoints, sem acesso direto à Internet, garantindo que o tráfego permaneça dentro da rede privada da AWS.
+
+### 6. NACLs (Listas de Controle de Acesso de Rede)
+
+- **NACL Pública**: Controla o tráfego das sub-redes públicas, permitindo o tráfego de entrada HTTP (porta 80) e HTTPS (porta 443) e permitindo todo o tráfego de saída.
+- **NACL Privada**: Controla o tráfego das sub-redes privadas, permitindo tráfego de entrada apenas para serviços AWS (via HTTPS) e permitindo todo o tráfego de saída.
+
+### 7. Alta Disponibilidade e Resiliência
+
+Recursos críticos são replicados em **múltiplas Zonas de Disponibilidade (AZs)** para garantir alta disponibilidade. Caso uma AZ falhe, os serviços continuam operando em outra zona.
+
+### 8. IAM Roles e Políticas
+
+- **lacfas-lambda-execution-role**: Atribuída às funções Lambda, permite o acesso necessário para interagir com serviços AWS como **S3**, **DynamoDB**, **Polly**, **Rekognition** e **Bedrock**.
+  
+  A política anexada garante permissões específicas para cada serviço, como leitura/escrita no bucket S3 (lacfas-bucket) e acesso às tabelas do DynamoDB.
 
 ---
 
 ## Boas Práticas Implementadas na Arquitetura
 
-A arquitetura da **VPC lacfas-vpc** segue as melhores práticas para garantir segurança, desempenho e escalabilidade:
+A arquitetura da **VPC lacfas-vpc** segue as melhores práticas de AWS:
 
-1. **VPC Customizada**: Foi criada uma **VPC customizada** para fornecer controle total sobre a configuração da rede. O uso de uma VPC customizada permite personalização para atender a requisitos específicos de segurança e isolamento, o que é recomendado em ambientes de produção.
+1. **VPC Customizada**: Criar uma VPC personalizada permite controle total sobre o design de rede, isolamento e segurança.
+2. **Planejamento de CIDR**: O bloco CIDR `10.0.0.0/16` foi planejado para evitar sobreposição de endereços e permitir expansões futuras.
+3. **Isolamento de Sub-redes**: Sub-redes separadas por função (desenvolvimento, banco de dados, chatbot) garantem isolamento adequado e aplicabilidade de políticas de segurança específicas.
+4. **Alta Disponibilidade com Múltiplas AZs**: A replicação em várias Zonas de Disponibilidade assegura alta disponibilidade e resiliência contra falhas em uma única zona.
+5. **Redução de Custos com VPC Endpoints**: O uso de VPC Endpoints substitui NAT Gateways, economizando custos e garantindo que o tráfego permaneça seguro dentro da rede da AWS.
 
-2. **Planejamento de CIDR**: O bloco CIDR `10.0.0.0/16` foi escolhido estrategicamente para evitar conflitos de endereçamento, proporcionando espaço para crescimento futuro e integração com outras redes através de **VPC Peering** ou **VPNs**.
-
-3. **Sub-redes Separadas por Função**: Cada tipo de serviço (banco de dados, chatbot, desenvolvimento) possui suas próprias sub-redes dedicadas, garantindo isolamento e aplicando políticas de segurança específicas. Esse isolamento facilita o gerenciamento da rede e melhora a segurança.
-
-4. **Alta Disponibilidade com Múltiplas Zonas de Disponibilidade**: A criação de sub-redes em múltiplas **Zonas de Disponibilidade (AZs)** garante a continuidade dos serviços em caso de falha em uma zona específica. Todos os recursos críticos são replicados em pelo menos duas AZs para garantir **alta disponibilidade**.
-
-5. **Redução de Custos com VPC Endpoints**: Em vez de usar **NAT Gateways**, a arquitetura utiliza **VPC Endpoints** para acessar serviços AWS, como **S3**, **DynamoDB**, **Polly**, **Rekognition** e **Bedrock**, diretamente de sub-redes privadas, reduzindo custos operacionais e aumentando a segurança, pois o tráfego não precisa sair para a Internet.
-
-Essa arquitetura foi projetada para maximizar a eficiência e segurança, minimizar custos e garantir escalabilidade para o crescimento futuro da aplicação.
+Esta infraestrutura foi projetada para maximizar segurança, desempenho e escalabilidade, minimizando custos e garantindo crescimento futuro.
