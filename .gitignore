@@ -169,3 +169,24 @@ node_modules/
 
 # Serverless
 .serverless/
+
+
+# Arquivos de estado do Terraform
+*.tfstate
+*.tfstate.backup
+*.tfstate.*
+
+# Diretório de bloqueio do Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Arquivo de variáveis sensíveis (se houver)
+#terraform.tfvars
+#terraform.tfvars.json
+
+# Arquivos de logs
+crash.log
+*.log
+
+# Arquivos de planos de execução
+*.tfplan
