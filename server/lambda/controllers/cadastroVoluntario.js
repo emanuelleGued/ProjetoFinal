@@ -1,10 +1,10 @@
 import { handleResponse } from '../utils/response-builder.js';
 import { generateTTS } from '../utils/generate-tts.js';
 import { validateSlots } from '../utils/validations.js';
-
+import axios from 'axios';
 
 export const handleCadastroVoluntarioIntent = async (event) => {
-    let responseMessage = "";
+    let responseMessage = "Aqui estão as informações que você forneceu: ";
 
     try {
         const slots = event.sessionState.intent.slots;
@@ -39,7 +39,7 @@ export const handleCadastroVoluntarioIntent = async (event) => {
         // Se todos os campos estiverem válidos, construa a mensagem de resposta
         for (const key in volunteerData) {
             const slotValue = volunteerData[key];
-            responseMessage += `${key}: ${slotValue}. `;
+            responseMessage += `${key.replace(/([A-Z])/g, ' $1')}: ${slotValue}. `;
         }
 
         // Persistir dados no DynamoDB
@@ -47,7 +47,23 @@ export const handleCadastroVoluntarioIntent = async (event) => {
 
         // Gerar áudio da resposta final
         const audioUrl = await generateTTS(responseMessage);
-        return handleResponse(event, 'Close', null, [responseMessage, audioUrl]);
+        
+        // Retornar resposta final
+        return {
+            sessionState: {
+                dialogAction: {
+                    type: 'Close', // ou 'ElicitSlot' se você estiver solicitando mais informações
+                },
+                intent: {
+                    name: 'CadastroVoluntario',
+                    state: 'Fulfilled',
+                },
+            },
+            messages: [
+                { contentType: 'PlainText', content: responseMessage },
+                { contentType: 'PlainText', content: audioUrl } // O URL do áudio se necessário
+            ],
+        };
 
     } catch (error) {
         console.log(error);
