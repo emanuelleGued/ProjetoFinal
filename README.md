@@ -6,6 +6,17 @@ Este projeto tem como objetivo desenvolver uma aplicação acessível e útil pa
 
 O foco principal deste projeto é criar um chatbot que servirá como um portal de comunicação e interação tanto para os idosos residentes quanto para seus cuidadores e familiares. Através do chatbot, os usuários poderão obter informações sobre as atividades do dia, como fisioterapia, palestras, atividades físicas, artes, crochê, bordado e outras atividades artesanais. Além disso, o chatbot permitirá solicitar ajuda e contribuir para a busca de idosos desaparecidos, enviando fotos que serão comparadas com uma base de dados interna.
 
+## 📖 Índice
+
+1. [🚀 Funcionalidades](#-funcionalidades)
+2. [🏛️ Arquitetura](#️-arquitetura)
+3. [🔄 Fluxo de Interação](#-fluxo-de-interação)
+4. [🛠️ Tecnologias utilizadas](#️-tecnologias-utilizadas)
+5. [🧱 Estrutura de Pastas](#-estrutura-de-pastas)
+6. [🚧 Desafios e Dificuldades](#-desafios-e-dificuldades)
+7. [👥 Contribuidores](#-contribuidores)
+
+
 ## 🚀 Funcionalidades
 
 - Saber as atividades que irão acontecer em determinado dia no lar;
@@ -13,7 +24,7 @@ O foco principal deste projeto é criar um chatbot que servirá como um portal d
 - Se cadastrar como voluntário para ajudar o lar em atividades;
 - Cadastrar idosos que querem receber uma visita em sua casa.
 
-## 🔧 Arquitetura
+## 🏛️ Arquitetura
 
 ![alt text](assets/arquitetura.png)
 
@@ -37,16 +48,110 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 6. **Amazon S3**: Armazena áudios do Polly.
 7. **Amazon DynamoDB**: Armazena hashcode dos áudios e também dados da intent de cadastro de idosos e de voluntários.
 
-## 🛠 Uso dos Serviços AWS
+## 🛠 Tecnologias Utilizadas
 
-- **Amazon Lex**: Interpretação de linguagem natural para o chatbot.
-- **Amazon Polly**: Geração de áudio para respostas textuais.
-- **Amazon Rekognition**: Análise e validação de comprovante de doação.
-- **Amazon Bedrock**: Personalização e contextualização de respostas do chatbot.
-- **AWS Lambda**: Lógica de backend e orquestração das chamadas de serviços AWS.
-- **Amazon S3**: Armazenamento de áudios do Polly.
-- **Amazon DynamoDB**: Armazenamento de dados dos áudios e do cadastro de idosos e de voluntários.
+<div>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-FF9911?style=for-the-badge&logo=javascript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
+   <img src="https://img.shields.io/badge/Serverless-000000?style=for-the-badge&logo=serverless&logoColor=white" />
+  <img src="https://img.shields.io/badge/AWS_Lambda-FF9900?style=for-the-badge&logo=amazon&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_DynamoDB-4053D6?style=for-the-badge&logo=amazondynamodb&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_Lex-009999?style=for-the-badge&logo=amazon&logoColor=white" />
+    <img src="https://img.shields.io/badge/Amazon_Bedrock-009999?style=for-the-badge&logo=amazon&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_Polly-009999?style=for-the-badge&logo=amazon&logoColor=white" />
+  <img src="https://img.shields.io/badge/Amazon_Rekognition-009999?style=for-the-badge&logo=amazon&logoColor=white" />
 
+</div>
+
+## 🧱 Estrutura de Pastas 
+
+- `api/`: Handlers e configuração do Serverless para a API.
+- `assets/`: Imagens e recursos visuais.
+- `bot/LACFASBot-DRAFT-WU0CVSFFHU-LexJson/`: Bot do Lex com suas Intents e Slots.
+- `infra/`: Infraestrutura da VPC.
+- `server/`: Servidor e Lambda.
+
+```
+│
+├── api/
+|   ├── utils/
+|       ├── convert_text_to_speech.py
+|       ├── creat_bucketS3.py
+|       ├── create_dynamoDB.py
+|       └── summarize_text.py
+│   ├── .env.example
+│   ├── handler.py
+│   ├── package-lock.json
+│   ├── package.json
+|   ├── post.py
+|   ├── requirements.txt
+|   ├── serverless.yml
+|   ├── slackHandler.py
+|   └── post.py
+│
+├── assets/
+│   └── arquitetura.png
+│
+├── bot/LACFASBot-DRAFT-WU0CVSFFHU-LexJson/
+│   ├── LACFAS/
+│   │   ├──  BotLocales/pt_BR/
+│   │       ├── Intents/
+│   │       ├── SlotTypes/
+│   │       └── BotLocale.json
+│   │   └── Bot.json
+│   └── Manifest.json
+│
+├── infra/
+│   ├── README.md
+│   ├── main.tf
+│   ├── terraform.tfvars
+│   └── variables.tf
+│
+├── server/
+│   ├── lambda/
+│       ├──  controllers/
+│           ├── atividadesDia.js
+│           ├── cadastro.js
+│           ├── cadastroVoluntario.js
+│           ├── doacao.js
+│           ├── escolherCadastro.js
+│           ├── fallback.js
+│           ├── saudacao.js
+│           └── visitas.js
+│       ├──  lib/
+│           └── api.js
+│       ├──  utils/
+│           ├── analyze-image.js
+│           ├── generate-tts.js
+│           ├── response-builder.js
+│           └── validations.js
+│       └──  index.js
+│   ├── .env.example
+│   ├── package-lock.json
+│   ├── package.json
+│   └── server.js
+│
+└── README.md
+
+```
+
+## 🚧 Desafios e Dificuldades
+
+Durante o desenvolvimento deste projeto, encontramos algumas dificuldades:
+
+1. **Integração de Múltiplos Serviços AWS:** A integração de serviços como Polly, Lex, S3, Rekognition, Bedrock e DynamoDB para garantir uma comunicação fluida e eficaz entre os componentes.
+
+2. **Gerenciamento de Estados do Chatbot:** Configurar e gerenciar intents e slots no Amazon Lex exigiu um planejamento cuidadoso para assegurar que as interações dos usuários fossem capturadas e processadas corretamente.
+
+3. **Processamento de Imagens com o Rekognition:** A etapa do processamento de imagens com o Rekognition na doação por exemplo, gerou diversos erros e complicações durante o processo.
+
+4. **Segurança das Credenciais:** Manter as credenciais AWS seguras e garantir que não fossem expostas durante o desenvolvimento foi uma prioridade.
+
+5. **Alinhamento com o Cliente:** O fato do desenvolvimento estar atrelado e dependente a uma pessoa de fora dificulta o processo de planejamento e criação de soluções.
+
+   
 ## 👥 Contribuidores
 <table>
   <tr>
