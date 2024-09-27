@@ -6,6 +6,7 @@ import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from utils.convert_text_to_speech import convert_text_to_speech_and_upload
+from utils.transcribe_audio import transcribe_audio_handler
 import logging
 
 # Configuração do logging
@@ -27,6 +28,7 @@ def lambda_handler(event, context):
 
     try:
         body = json.loads(event.get("body", "{}"))
+
         # Verifica se o evento é uma verificação de URL do Slack
         if body.get("type") == "url_verification":
             logger.info("Verificação de URL do Slack recebida")
@@ -38,8 +40,12 @@ def lambda_handler(event, context):
         # Verifica se o evento é uma requisição para o TTS
         if body.get("phrase"):
             return v1_tts(event, context)
+
+        # Verifica se o evento é uma requisição para transcrição de áudio
+        if body.get("transcribe_audio"):
+            return transcribe_audio_handler(event, context)
         else:
-            raise ValueError("Phrase is required in the body of the request.")
+            raise ValueError("Phrase or transcribe_audio is required in the body of the request.")
 
     except ValueError as e:
         logger.error(f"Erro de validação: {str(e)}", exc_info=True)
