@@ -69,9 +69,9 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 
 - `api/`: Handlers e configuração do Serverless para a API.
 - `assets/`: Imagens e recursos visuais.
-- `bot/LACFASBot-DRAFT-WU0CVSFFHU-LexJson/`: Código-fonte principal, incluindo:
-- `infra/`: Funções Lambda específicas.
-- `server/`: Funções Lambda específicas.
+- `bot/LACFASBot-DRAFT-WU0CVSFFHU-LexJson/`: Bot do Lex com suas Intents e Slots.
+- `infra/`: Infraestrutura da VPC.
+- `server/`: Servidor e Lambda.
 
 ```
 │
