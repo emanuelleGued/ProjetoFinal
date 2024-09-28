@@ -3,6 +3,7 @@ import boto3
 import time
 import logging
 import requests
+import os
 
 # Inicializa o cliente do AWS Transcribe
 transcribe = boto3.client('transcribe')
@@ -10,7 +11,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Nome do bucket S3
-BUCKET_NAME = 'larcfas'
+BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 
 def transcribe_audio_handler(event, context):
     logger.info("Transcrição de áudio iniciada")
@@ -20,7 +21,9 @@ def transcribe_audio_handler(event, context):
         # Analisa o corpo do evento
         body = json.loads(event.get("body", "{}"))
         audio_file_url = body["audio_file_path"]  
-        object_key = audio_file_url.split(f"https://{BUCKET_NAME}.s3.amazonaws.com/")[1]
+        print(audio_file_url)
+        object_key = audio_file_url.split(f"https://{BUCKET_NAME}.s3.amazonaws.com/audios/")[1]
+        print(object_key)
     except KeyError:
         return {
             "statusCode": 400,
@@ -36,6 +39,7 @@ def transcribe_audio_handler(event, context):
     job_name = "transcription-job-" + str(int(time.time())) 
     response = transcribe.start_transcription_job(
         TranscriptionJobName=job_name,
+        MediaFormat= 'mp4',
         Media={'MediaFileUri': audio_file_url},
         OutputBucketName=BUCKET_NAME,
         LanguageCode='pt-BR'

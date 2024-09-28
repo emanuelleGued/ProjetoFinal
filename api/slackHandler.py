@@ -3,6 +3,8 @@ import boto3
 import os
 import requests
 from urllib.parse import unquote
+from utils.transcribe_audio import transcribe_audio_handler
+import subprocess
 
 s3_client = boto3.client('s3')
 
@@ -53,7 +55,35 @@ def lambda_handler(event, context):
 
                         # Modifica o texto do evento com a chave do comprovante
                         slack_event['event']['text'] = f"aqui está o comprovante {image_key}"
+                        
+                    elif file['mimetype'].startswith("audio/") or file['mimetype'] == 'video/quicktime':
+                        
+                        file_url = unquote(file['url_private_download'])
+                        headers = {"Authorization": f"Bearer {os.environ['SLACK_TOKEN']}"}
+                        audio_data = requests.get(file_url, headers=headers).content
 
+                        audio_key = f"audios/{file['id']}.mp4"  
+                        s3_client.put_object(
+                            Bucket=os.environ['S3_BUCKET_NAME'],
+                            Key=audio_key,
+                            Body=audio_data,
+                            ContentType='audio/mp4'  
+                        )
+
+                        # Monta o URL do arquivo no S3
+                        audio_file_path = f"https://{os.environ['S3_BUCKET_NAME']}.s3.amazonaws.com/{audio_key}"
+
+                        # Chama a função de transcrição
+                        transcribe_audio_event = {
+                            "body": json.dumps({"audio_file_path": audio_file_path})
+                        }
+                        evento_transcribe = transcribe_audio_handler(transcribe_audio_event, None)
+                        print(evento_transcribe)
+
+                        # Verifica a resposta e extrai a transcrição
+                        transcription_body = json.loads(evento_transcribe['body'])
+                        slack_event['event']['text'] = transcription_body.get('transcription', "Transcrição não disponível.")
+                        
                 try:
                     # Extrai mensagens do Slack
                     text = slack_event['event']['text']

@@ -6,6 +6,10 @@ export const handleDoacaoIntent = async (event) => {
     const slots = event.sessionState.intent.slots;
     const inputTranscript = event.inputTranscript;
 
+    if(slots.TipoDeDoacao == null){
+        return handleResponse(event, "ElicitSlot", "TipoDeDoacao", null);
+    }
+    
     // Verifica se a doação é por pix
     if (intentName === 'FazerDoacao' && slots.TipoDeDoacao.value.interpretedValue === 'pix') {
         // Verifica se o valor do Pix foi informado
