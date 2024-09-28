@@ -57,29 +57,18 @@ def lambda_handler(event, context):
                         slack_event['event']['text'] = f"aqui está o comprovante {image_key}"
                         
                     elif file['mimetype'].startswith("audio/") or file['mimetype'] == 'video/quicktime':
-                
+                        
                         file_url = unquote(file['url_private_download'])
                         headers = {"Authorization": f"Bearer {os.environ['SLACK_TOKEN']}"}
                         audio_data = requests.get(file_url, headers=headers).content
 
-                        # Salva o áudio em um arquivo temporário
-                        temp_audio_path = f"/tmp/{file['id']}.mp4" 
-                        with open(temp_audio_path, 'wb') as f:
-                            f.write(audio_data)
-
-                        # Converte o áudio para MP4 se necessário
-                        converted_audio_path = f"/tmp/{file['id']}.mp4"
-                        subprocess.run(['ffmpeg', '-i', temp_audio_path, converted_audio_path])
-
-                        # Envia o áudio convertido para o S3
-                        audio_key = f"audios/{file['id']}.mp4"
-                        with open(converted_audio_path, 'rb') as f:
-                            s3_client.put_object(
-                                Bucket=os.environ['S3_BUCKET_NAME'],
-                                Key=audio_key,
-                                Body=f,
-                                ContentType='audio/mp4'  # Certifique-se de que é o tipo correto
-                            )
+                        audio_key = f"audios/{file['id']}.mp4"  
+                        s3_client.put_object(
+                            Bucket=os.environ['S3_BUCKET_NAME'],
+                            Key=audio_key,
+                            Body=audio_data,
+                            ContentType='audio/mp4'  
+                        )
 
                         # Monta o URL do arquivo no S3
                         audio_file_path = f"https://{os.environ['S3_BUCKET_NAME']}.s3.amazonaws.com/{audio_key}"
@@ -93,7 +82,7 @@ def lambda_handler(event, context):
 
                         # Verifica a resposta e extrai a transcrição
                         transcription_body = json.loads(evento_transcribe['body'])
-                        slack_event['event']['text'] = transcription_body.get('transcription')
+                        slack_event['event']['text'] = transcription_body.get('transcription', "Transcrição não disponível.")
                         
                 try:
                     # Extrai mensagens do Slack
