@@ -8,6 +8,10 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
+        - "bedrock:InvokeModel"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
         - "s3:ListBucket"
         - "s3:GetObject"
         - "s3:PutObject"
@@ -121,6 +125,13 @@ functions:
     events:
       - httpApi:
           path: /cadastrar_voluntario
+          method: post
+
+  generateDynamicQuestion:
+    handler: handler.generate_dynamic_question_handler
+    events:
+      - httpApi:
+          path: /generate-question
           method: post
 
   processSlackMessage:
