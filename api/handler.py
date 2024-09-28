@@ -1,6 +1,7 @@
 import json
 import boto3
 from botocore.exceptions import ClientError
+from utils.generate_dynamic_question import generate_dynamic_question
 
 # Inicializa o cliente DynamoDB
 dynamodb = boto3.resource('dynamodb')
@@ -52,3 +53,22 @@ def persist_voluntario(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': str(e)})
         }
+    
+def generate_dynamic_question_handler(event, context):
+    try:
+        body = json.loads(event['body'])
+        text = body.get('context', None)
+        if not text:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Context is required."})
+            }
+        
+        # Gera a pergunta
+        return generate_dynamic_question(text)
+    except (json.JSONDecodeError, KeyError):
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Invalid input format."})
+        }
+
