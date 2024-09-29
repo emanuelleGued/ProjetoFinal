@@ -29,7 +29,7 @@ export const handleSaudacaoIntent = async (event) => {
             imageResponseCard: {
               title: phrases.Saudacao.success,
               imageUrl:
-                "https://public-lacfas-bucket.s3.amazonaws.com/fachada-lacfas.png",
+                "https://lacfas-audio-bucket.s3.amazonaws.com/images/fachada-lacfas.png",
               buttons: phrases.Saudacao.buttons,
             },
           },

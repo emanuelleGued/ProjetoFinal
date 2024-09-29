@@ -4,7 +4,8 @@ import os
 import requests
 from urllib.parse import unquote
 from utils.transcribe_audio import transcribe_audio_handler
-import subprocess
+from utils.send_message_to_slack import send_to_slack
+from utils.send_to_lex import post_to_lex
 
 s3_client = boto3.client('s3')
 
@@ -46,6 +47,7 @@ def lambda_handler(event, context):
                         img_data = requests.get(file_url, headers=headers).content
 
                         image_key = file['id']  # Apenas o ID da imagem para simplificação
+                        
                         s3_client.put_object(
                             Bucket=os.environ['S3_BUCKET_NAME'],
                             Key=f"comprovantes/{image_key}.png",  # Nome do arquivo como chave no S3
@@ -84,16 +86,13 @@ def lambda_handler(event, context):
                         transcription_body = json.loads(evento_transcribe['body'])
                         slack_event['event']['text'] = transcription_body.get('transcription', "Transcrição não disponível.")
                         
+                # Processar a mensagem de texto
                 try:
-                    # Extrai mensagens do Slack
                     text = slack_event['event']['text']
                     user = slack_event['event']['user']
                     channel = slack_event['event']['channel']
 
-                    # Envia para o Lex
                     lex_response = post_to_lex(text, user)
-
-                    # Envia resposta do Lex para o Slack
                     send_to_slack(lex_response, channel)
 
                     return {
@@ -103,6 +102,7 @@ def lambda_handler(event, context):
                             'lexResponse': lex_response
                         })
                     }
+
                 except requests.RequestException as error:
                     print(f"Erro ao encaminhar a mensagem para o Lex: {error}")
                     return {
@@ -116,84 +116,11 @@ def lambda_handler(event, context):
         }
 
     except KeyError as error:
-        print(f"Erro de chave: {error}")
+
         return {
             'statusCode': 400,
             'body': json.dumps({'message': 'Estrutura de evento inesperada.'})
         }
-    except Exception as error:
-        print(f"Erro inesperado: {error}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'message': 'Erro interno no servidor.'})
-        }
         
-def post_to_lex(text, user_id):
-    lex_client = boto3.client('lexv2-runtime')
-    
-    response = lex_client.recognize_text(
-        botId=os.environ.get('LEX_BOT_ID'),          
-        botAliasId=os.environ.get('LEX_BOT_ALIAS_ID'),
-        localeId=os.environ.get('LEX_LOCALE_ID', 'pt_BR'), 
-        sessionId=user_id,
-        text=text
-    )
-    
-    messages = response.get('messages', [])
-    
-    if messages:
-        for message in messages:
-            if message['contentType'] == 'ImageResponseCard':
-                # Formatar o card para o Slack usando Block Kit
-                card = {
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": f"*{message['imageResponseCard']['title']}*"
-                            }
-                        },
-                        {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": button['text']
-                                    },
-                                    "value": button['value'],
-                                    "action_id": button['value'] 
-                                } for button in message['imageResponseCard']['buttons']
-                            ]
-                        }
-                    ]
-                }
-                return card
-
-            if message['contentType'] == 'PlainText':
-                return {"text": message.get('content')}
-
-    return {"text": 'Desculpe, não entendi'}
-
-
-def send_to_slack(message, channel):
-    slack_token = os.environ['SLACK_TOKEN']
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {slack_token}'
-    }
-    payload = {
-        'channel': channel,
-        'blocks': message.get('blocks', []),
-        'text': message.get('text', '')
-    }
-    response = requests.post(
-        'https://slack.com/api/chat.postMessage',
-        headers=headers,
-        json=payload
-    )
-    return response.json()
 
 
