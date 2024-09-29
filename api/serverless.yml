@@ -1,28 +1,34 @@
-service: api-tts
+service: api-tts-2
 
 provider:
   name: aws
   runtime: python3.11
   region: us-east-1
   profile: ${env:PROFILE_NAME, 'default'}
+
+
+  timeout: 10  # Timeout de 10 segundos por função
+  memorySize: 512  # 512 MB de memória por função
+
   iamRoleStatements:
+    # Princípio de menor privilégio para permissões IAM
     - Effect: "Allow"
       Action:
         - "bedrock:InvokeModel"
-      Resource: "*"
+      Resource: "arn:aws:bedrock:${self:provider.region}:${aws:accountId}:model/*"
     - Effect: "Allow"
       Action:
         - "s3:ListBucket"
         - "s3:GetObject"
         - "s3:PutObject"
-      Resource: "arn:aws:s3:::${env:S3_BUCKET_NAME}/*"
+      Resource: "arn:aws:s3:::${env:S3_PUBLIC_BUCKET_NAME}/*"
     - Effect: "Allow"
       Action:
         - "dynamodb:PutItem"
         - "dynamodb:GetItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
-      Resource: 
+      Resource:
         - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/CadastroIdosos"
         - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/CadastroVoluntarios"
         - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${env:DYNAMODB_TABLE}"
@@ -51,19 +57,32 @@ provider:
     - Effect: "Allow"
       Action:
         - "s3:GetObject"
-      Resource: "arn:aws:s3:::${env:S3_BUCKET_NAME}/*"
-  environment:
-    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
-    DYNAMODB_TABLE: ${env:DYNAMODB_TABLE}
-  deploymentBucket:
-    name: ${env:S3_BUCKET_NAME}
+      Resource: "arn:aws:s3:::${env:S3_PUBLIC_BUCKET_NAME}/*"
 
+  
 plugins:
-  - serverless-python-requirements
-  - serverless-dotenv-plugin
+  - serverless-python-requirements  
+  - serverless-dotenv-plugin        
 
 resources:
   Resources:
+
+  # Definição da tabela DynamoDB para registro dos audios
+    NovaTabelaDynamoDB:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: !Sub "${env:DYNAMODB_TABLE}"  # Nome da tabela definido por variável de ambiente
+        AttributeDefinitions:
+          - AttributeName: "PK"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "PK"
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST  # Modo pay-per-request para otimização de custos
+        SSESpecification:  # Ativando criptografia de dados em repouso usando KMS
+          SSEEnabled: true
+
+    # Definição da tabela DynamoDB CadastroIdosos 
     CadastroIdosos:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -74,8 +93,11 @@ resources:
         KeySchema:
           - AttributeName: "PK"
             KeyType: "HASH"
-        BillingMode: PAY_PER_REQUEST
+        BillingMode: PAY_PER_REQUEST  # Modo pay-per-request para otimização de custos
+        SSESpecification:  # Ativando criptografia de dados em repouso usando KMS
+          SSEEnabled: true
 
+    # Definição da tabela DynamoDB CadastroVoluntarios com criptografia
     CadastroVoluntarios:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -87,65 +109,172 @@ resources:
           - AttributeName: "PK"
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
+        SSESpecification:  # Ativando criptografia de dados em repouso usando KMS
+          SSEEnabled: true
+
+    # Definição do bucket S3 totalmente pública sem ACL
+    S3PublicBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${env:S3_PUBLIC_BUCKET_NAME}  # Nome do bucket definido pela variável de ambiente
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: BucketOwnerEnforced  # Exigir que o proprietário do bucket possua todos os objetos
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          IgnorePublicAcls: true
+          BlockPublicPolicy: false
+          RestrictPublicBuckets: false
+
+    # Política pública para o bucket
+    S3PublicBucketPolicy:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+        Bucket: !Ref S3PublicBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: "PublicReadGetObject"
+              Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: !Sub "${S3PublicBucket.Arn}/*"
+
+    # Definição do bucket S3 para armazenar os backups
+    S3BackupBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${env:S3_BACKUP_BUCKET_NAME}
+        VersioningConfiguration:
+          Status: "Enabled"
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: "AES256"
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    # Definir o SNS Topic
+    SNSTopic:
+      Type: "AWS::SNS::Topic"
+      Properties:
+        TopicName: "BackupNotificationTopic"
+        DisplayName: "DynamoDB Backup Notifications"
+
+    # Backup plan para as tabelas DynamoDB
+    DynamoDBBackupPlan:
+      Type: "AWS::Backup::BackupPlan"
+      Properties:
+        BackupPlan:
+          BackupPlanName: "DynamoDBBackupPlan"
+          BackupPlanRule:
+            - RuleName: "DailyBackup"
+              TargetBackupVault: !Ref BackupVault
+              ScheduleExpression: "cron(0 12 * * ? *)"  # Backup diário às 12:00 UTC
+              StartWindowMinutes: 60
+              CompletionWindowMinutes: 180
+              Lifecycle:
+                DeleteAfterDays: 30  # Manter backups por 30 dias
+              RecoveryPointTags:
+                BackupType: "DynamoDB"
+                Environment: "Production"
+
+    BackupVault:
+      Type: "AWS::Backup::BackupVault"
+      Properties:
+        BackupVaultName: "DynamoDBBackupVault"
+        Notifications:  # Corrigido para ser um JSONObject
+          BackupVaultEvents:
+            - BACKUP_JOB_COMPLETED
+            - BACKUP_JOB_FAILED
+          SNSTopicArn: !Ref SNSTopic  # Referência ao tópico SNS para notificações
+
 
 functions:
+  # Função de health check 
   health:
     name: lacfas-health-function
     handler: handler.health
+    memorySize: 256  # Memória otimizada para 256MB
+    timeout: 5  # Timeout otimizado para 5 segundos
     events:
       - httpApi:
           path: /
           method: get
-          
+
+  # Função para descrição da API
   v1Description:
-    name: lacfas-v1-description-function 
+    name: lacfas-v1-description-function
     handler: handler.v1_description
+    memorySize: 256  # Memória otimizada
+    timeout: 5  # Timeout otimizado
     events:
       - httpApi:
           path: /v1
           method: get
 
+  # Função de Text-to-Speech (TTS)
   v1_tts:
-    name: lacfas-v1-tts-function 
+    name: lacfas-v1-tts-function
     handler: post.lambda_handler
+    memorySize: 512  # Aumentando a memória para lidar com grandes dados de TTS
+    timeout: 10  # Timeout mais alto para operações demoradas
     events:
       - httpApi:
           path: /v1/tts
           method: post
 
+  # Função para cadastrar idosos no DynamoDB
   cadastrarIdoso:
     handler: handler.persist_idoso
+    memorySize: 256  # Memória otimizada para 256MB
+    timeout: 10  # Timeout razoável para inserções no DynamoDB
     events:
       - httpApi:
           path: /cadastrar_idoso
           method: post
 
+  # Função para cadastrar voluntários no DynamoDB
   cadastrarVoluntario:
     handler: handler.persist_voluntario
+    memorySize: 256
+    timeout: 10
     events:
       - httpApi:
           path: /cadastrar_voluntario
           method: post
 
+  # Função para gerar perguntas dinâmicas
   generateDynamicQuestion:
     handler: handler.generate_dynamic_question_handler
+    memorySize: 256
+    timeout: 10
     events:
       - httpApi:
           path: /generate-question
           method: post
 
+  # Função para processar mensagens do Slack
   processSlackMessage:
     handler: slackHandler.lambda_handler
+    memorySize: 256
+    timeout: 10
     events:
       - httpApi:
           path: /slack/events
           method: post
     environment:
-      S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+      S3_BUCKET_NAME: ${env:S3_PUBLIC_BUCKET_NAME}
 
+  # Função para transcrição de áudio usando AWS Transcribe
   transcribeAudio:
     name: lacfas-v1-transcribe-function
     handler: utils.transcribe_audio.transcribe_audio_handler
+    memorySize: 512  # Aumentando memória para processar áudios maiores
+    timeout: 15  # Timeout maior para lidar com transcrições mais demoradas
     events:
       - httpApi:
           path: /v1/transcribe
