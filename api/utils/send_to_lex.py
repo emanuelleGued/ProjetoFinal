@@ -41,33 +41,39 @@ def post_to_lex(text, user_id):
 
 def format_response_card(message):
     # Formatar o card para o Slack usando Block Kit
-    return {
-        "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"{message['imageResponseCard']['title']}\n{message['imageResponseCard'].get('subtitle', '')}"
-                }
-            },
-            {
-                "type": "image",
-                "image_url": message['imageResponseCard']['imageUrl'],
-                "alt_text": "Imagem do card"  # Texto alternativo para a imagem
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": button['text']
-                        },
-                        "value": button['value'],
-                        "action_id": button['value']
-                    } for button in message['imageResponseCard']['buttons']
-                ]
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"{message['imageResponseCard']['title']}\n{message['imageResponseCard'].get('subtitle', '')}"
             }
+        }
+    ]
+    
+    # Adiciona o bloco de imagem apenas se 'imageUrl' estiver presente
+    if 'imageUrl' in message['imageResponseCard']:
+        blocks.append({
+            "type": "image",
+            "image_url": message['imageResponseCard']['imageUrl'],
+            "alt_text": "Imagem do card"  # Texto alternativo para a imagem
+        })
+    
+    # Adiciona os botões ao card
+    blocks.append({
+        "type": "actions",
+        "elements": [
+            {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": button['text']
+                },
+                "value": button['value'],
+                "action_id": button['value']
+            } for button in message['imageResponseCard']['buttons']
         ]
-    }
+    })
+
+    return {"blocks": blocks}
+
