@@ -37,8 +37,6 @@ def post_to_lex(text, user_id):
 
         return response_data
 
-    return {"text": 'Desculpe, não entendi'}
-
 def format_response_card(message):
     # Formatar o card para o Slack usando Block Kit
     blocks = [

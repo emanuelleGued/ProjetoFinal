@@ -33,8 +33,11 @@ export const analyzeImage = async (imageKey, valorPix) => {
 
         valorPix = valorPix.replace(".", ",");
         const isValorPixFound = detectedText.includes("R$" + valorPix);
-        const isPixKeyFound = detectedText.includes('pix@gmail.com');
+        const isPixKeyFound = detectedText.includes(process.env.PIX_KEY);
 
+        console.log(isValorPixFound);
+        console.log(isPixKeyFound);
+        console.log(detectedText);
         if (!isValorPixFound || !isPixKeyFound) {
             // Caso os dados não confiram, deleta a imagem
             await deleteImageFromS3(bucketName, `comprovantes/${imageKey}.png`);
