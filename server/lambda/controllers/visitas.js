@@ -18,7 +18,13 @@ export const handleVisitasIntent = async (event) => {
         // Verificação da data (apenas terça-feira permitida)
         if (Data && Data.value) {
             let dataSlot = new Date(Data.value.originalValue.trim());
-            responseMessage += `Data da visita: ${dataSlot}. `;
+            // Formatação da data no formato dd/mm/aaaa
+            let dataFormatada = dataSlot.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+            });
+            responseMessage += `Data da visita: ${dataFormatada}. `;
 
         } else {
             return handleResponse(event, 'ElicitSlot', 'Data', 'Para qual data você gostaria de agendar a visita?');

@@ -190,3 +190,6 @@ crash.log
 
 # Arquivos de planos de execução
 *.tfplan
+
+# Removendo Python Env
+api/lacfas-api

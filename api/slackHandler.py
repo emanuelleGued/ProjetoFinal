@@ -3,10 +3,16 @@ import boto3
 import os
 import requests
 from urllib.parse import unquote
+from utils.send_message_to_slack import send_to_slack
+from utils.send_to_lex import post_to_lex
+from utils.transcribe_audio import transcribe_audio_handler
 
 s3_client = boto3.client('s3')
+isProcessingMessage = False  # Variável para controlar o fluxo de mensagens
 
 def lambda_handler(event, context):
+    global isProcessingMessage  # Torna a variável global para ser usada dentro da função
+
     try:
         slack_event = json.loads(event['body'])
 
@@ -17,27 +23,28 @@ def lambda_handler(event, context):
                 'body': json.dumps({'challenge': slack_event.get('challenge')})
             }
 
-        # Verificar se o evento tem texto e não é uma mensagem enviada pelo bot
-        if 'event' in slack_event:
+        # Verificar se há um evento e se o bot não está processando uma mensagem
+        if 'event' in slack_event and not isProcessingMessage:
             event_data = slack_event['event']
             
             # Verifica se a mensagem foi enviada por um bot (bot_id presente)
             if 'bot_id' in event_data:
-                
                 return {
                     'statusCode': 200,
                     'body': json.dumps({'message': "Mensagem do bot ignorada."})
                 }
 
             # Se a mensagem foi enviada por um usuário (sem bot_id)
-            if 'user' in event_data and 'text' in slack_event['event']:
+            if 'user' in event_data and 'text' in event_data:
+
+                # Indica que uma mensagem está sendo processada
+                isProcessingMessage = True
 
                 # Se o evento contém arquivos e o arquivo é uma imagem
-                if 'files' in slack_event['event'] and len(slack_event['event']['files']) > 0:
-                    file = slack_event['event']['files'][0]
+                if 'files' in event_data and len(event_data['files']) > 0:
+                    file = event_data['files'][0]
 
                     if file['mimetype'].startswith("image/"):
-
                         # Download da imagem e upload para o S3
                         file_url = unquote(file['url_private_download'])  # URL privada para download
                         headers = {"Authorization": f"Bearer {os.environ['SLACK_TOKEN']}"}
@@ -54,31 +61,56 @@ def lambda_handler(event, context):
                         # Modifica o texto do evento com a chave do comprovante
                         slack_event['event']['text'] = f"aqui está o comprovante {image_key}"
 
+                    elif file['mimetype'].startswith("audio/") or file['mimetype'] == 'video/quicktime':
+                        
+                        file_url = unquote(file['url_private_download'])
+                        headers = {"Authorization": f"Bearer {os.environ['SLACK_TOKEN']}"}
+                        audio_data = requests.get(file_url, headers=headers).content
+
+                        audio_key = f"audios/{file['id']}.mp4"  
+                        s3_client.put_object(
+                            Bucket=os.environ['S3_BUCKET_NAME'],
+                            Key=audio_key,
+                            Body=audio_data,
+                            ContentType='audio/mp4'  
+                        )
+
+                        # Monta o URL do arquivo no S3
+                        audio_file_path = f"https://{os.environ['S3_BUCKET_NAME']}.s3.amazonaws.com/{audio_key}"
+
+                        # Chama a função de transcrição
+                        transcribe_audio_event = {
+                            "body": json.dumps({"audio_file_path": audio_file_path})
+                        }
+                        evento_transcribe = transcribe_audio_handler(transcribe_audio_event, None)
+                        print(evento_transcribe)
+
+                        # Verifica a resposta e extrai a transcrição
+                        transcription_body = json.loads(evento_transcribe['body'])
+                        slack_event['event']['text'] = transcription_body.get('transcription', "Transcrição não disponível.")
+
                 try:
                     # Extrai mensagens do Slack
-                    text = slack_event['event']['text']
-                    user = slack_event['event']['user']
-                    channel = slack_event['event']['channel']
+                    text = event_data['text']
+                    user = event_data['user']
+                    channel = event_data['channel']
 
                     # Envia para o Lex
                     lex_response = post_to_lex(text, user)
+                    print(lex_response)
 
                     # Envia resposta do Lex para o Slack
                     send_to_slack(lex_response, channel)
 
-                    return {
-                        'statusCode': 200,
-                        'body': json.dumps({
-                            'message': "Evento processado e enviado ao backend.",
-                            'lexResponse': lex_response
-                        })
-                    }
                 except requests.RequestException as error:
                     print(f"Erro ao encaminhar a mensagem para o Lex: {error}")
                     return {
                         'statusCode': 500,
                         'body': json.dumps({'message': 'Erro ao encaminhar a mensagem ao Lex.'})
                     }
+                finally:
+                    # Mensagem processada, liberar o controle
+                    isProcessingMessage = False
 
         return {
             'statusCode': 200,
@@ -97,73 +129,4 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'message': 'Erro interno no servidor.'})
         }
-        
-def post_to_lex(text, user_id):
-    lex_client = boto3.client('lexv2-runtime')
-    
-    response = lex_client.recognize_text(
-        botId=os.environ.get('LEX_BOT_ID'),          
-        botAliasId=os.environ.get('LEX_BOT_ALIAS_ID'),
-        localeId=os.environ.get('LEX_LOCALE_ID', 'pt_BR'), 
-        sessionId=user_id,
-        text=text
-    )
-    
-    messages = response.get('messages', [])
-    
-    if messages:
-        for message in messages:
-            if message['contentType'] == 'ImageResponseCard':
-                # Formatar o card para o Slack usando Block Kit
-                card = {
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": f"*{message['imageResponseCard']['title']}*"
-                            }
-                        },
-                        {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": button['text']
-                                    },
-                                    "value": button['value'],
-                                    "action_id": button['value'] 
-                                } for button in message['imageResponseCard']['buttons']
-                            ]
-                        }
-                    ]
-                }
-                return card
-
-            if message['contentType'] == 'PlainText':
-                return {"text": message.get('content')}
-
-    return {"text": 'Desculpe, não entendi'}
-
-
-def send_to_slack(message, channel):
-    slack_token = os.environ['SLACK_TOKEN']
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {slack_token}'
-    }
-    payload = {
-        'channel': channel,
-        'blocks': message.get('blocks', []),
-        'text': message.get('text', '')
-    }
-    response = requests.post(
-        'https://slack.com/api/chat.postMessage',
-        headers=headers,
-        json=payload
-    )
-    return response.json()
-
 

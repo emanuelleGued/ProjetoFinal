@@ -8,6 +8,10 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
+        - "bedrock:InvokeModel"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
         - "s3:ListBucket"
         - "s3:GetObject"
         - "s3:PutObject"
@@ -38,6 +42,16 @@ provider:
       Action:
         - "lex:RecognizeText"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "transcribe:StartTranscriptionJob"
+        - "transcribe:GetTranscriptionJob"
+        - "transcribe:ListTranscriptionJobs"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+      Resource: "arn:aws:s3:::${env:S3_BUCKET_NAME}/*"
   environment:
     S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
     DYNAMODB_TABLE: ${env:DYNAMODB_TABLE}
@@ -50,7 +64,6 @@ plugins:
 
 resources:
   Resources:
-    # Tabela de Cadastro de Idosos
     CadastroIdosos:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -63,7 +76,6 @@ resources:
             KeyType: "HASH"
         BillingMode: PAY_PER_REQUEST
 
-    # Tabela de Cadastro de Voluntários
     CadastroVoluntarios:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -84,6 +96,7 @@ functions:
       - httpApi:
           path: /
           method: get
+          
   v1Description:
     name: lacfas-v1-description-function 
     handler: handler.v1_description
@@ -91,6 +104,7 @@ functions:
       - httpApi:
           path: /v1
           method: get
+
   v1_tts:
     name: lacfas-v1-tts-function 
     handler: post.lambda_handler
@@ -112,7 +126,14 @@ functions:
       - httpApi:
           path: /cadastrar_voluntario
           method: post
-          
+
+  generateDynamicQuestion:
+    handler: handler.generate_dynamic_question_handler
+    events:
+      - httpApi:
+          path: /generate-question
+          method: post
+
   processSlackMessage:
     handler: slackHandler.lambda_handler
     events:
@@ -121,3 +142,11 @@ functions:
           method: post
     environment:
       S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+
+  transcribeAudio:
+    name: lacfas-v1-transcribe-function
+    handler: utils.transcribe_audio.transcribe_audio_handler
+    events:
+      - httpApi:
+          path: /v1/transcribe
+          method: post
