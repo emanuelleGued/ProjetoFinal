@@ -22,7 +22,7 @@ def post_to_lex(text, user_id):
         for message in messages:
             if message['contentType'] == 'ImageResponseCard':
                 card = format_response_card(message)
-                return card
+                return card  # Retorne o card formatado diretamente
 
             if message['contentType'] == 'PlainText':
                 if message.get('content').startswith('http'):
@@ -47,9 +47,13 @@ def format_response_card(message):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    # Usar o método .get() para evitar KeyError caso 'subtitle' não exista
                     "text": f"{message['imageResponseCard']['title']}\n{message['imageResponseCard'].get('subtitle', '')}"
                 }
+            },
+            {
+                "type": "image",
+                "image_url": message['imageResponseCard']['imageUrl'],
+                "alt_text": "Imagem do card"  # Texto alternativo para a imagem
             },
             {
                 "type": "actions",
@@ -61,7 +65,7 @@ def format_response_card(message):
                             "text": button['text']
                         },
                         "value": button['value'],
-                        "action_id": button['value']  # Identifica o botão pelo valor de ação
+                        "action_id": button['value']
                     } for button in message['imageResponseCard']['buttons']
                 ]
             }
