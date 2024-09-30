@@ -31,7 +31,7 @@ export const handleDoacaoIntent = async (event) => {
 
             // Se ambos, o valor do Pix e a chave Pix forem encontrados na imagem
             if (isValorPixFound && isPixKeyFound) {
-                const successMessage = "Obrigado por enviar o comprovante de imagem!";
+                const successMessage = "Obrigado por sua doação!";
                 return handleResponse(event, "Close", null, successMessage);
             } else {
                 const errorMessage = "O comprovante enviado não contém as informações necessárias.";
