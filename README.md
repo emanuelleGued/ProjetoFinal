@@ -78,9 +78,12 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 ├── api/
 |   ├── utils/
 |       ├── convert_text_to_speech.py
-|       ├── creat_bucketS3.py
+|       ├── create_bucketS3.py
 |       ├── create_dynamoDB.py
-|       └── summarize_text.py
+|       ├── send_to_lex.py
+|       ├── generate_dynamic_question.py
+|       ├── transcribe_audio.py
+|       └── send_message_to_slack.py
 │   ├── .env.example
 │   ├── handler.py
 │   ├── package-lock.json
