@@ -68,11 +68,11 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 ## 📝 Documentos 
 
   <div style="display: flex; justify-content: space-between;">
-    <a href="assets/Elicitação de Requisitos.pdf" style="width:48%">
-      <img src="assets/ELR.png" alt="ELR"/>
+    <a href="assets/Elicitação de Requisitos.pdf" style="width:28%">
+      <img src="assets/ELR.png" alt="ELR" style="width:49%"/>
     </a>
-    <a href="assets/Documento de Requisitos de Software - DRS.pdf" style="width:48%">
-      <img src="assets/DRS.png" alt="DRS" />
+    <a href="assets/Documento de Requisitos de Software - DRS.pdf" style="width:28%"/>
+      <img src="assets/DRS.png" alt="DRS"  style="width:49%"/>
     </a>
   </div>
 
