@@ -12,8 +12,8 @@ O foco principal deste projeto é criar um chatbot que servirá como um portal d
 2. [🏛️ Arquitetura](#️-arquitetura)
 3. [🔄 Fluxo de Interação](#-fluxo-de-interação)
 4. [🛠️ Tecnologias utilizadas](#️-tecnologias-utilizadas)
-5. [🧱 Estrutura de Pastas](#-estrutura-de-pastas)
-6. [🚧 Desafios e Dificuldades](#-desafios-e-dificuldades)
+5. [📝 Documentos](#️-documentos)
+6. [🧱 Estrutura de Pastas](#-estrutura-de-pastas)
 7. [👥 Contribuidores](#-contribuidores)
 
 
@@ -64,6 +64,22 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
   <img src="https://img.shields.io/badge/Amazon_Rekognition-009999?style=for-the-badge&logo=amazon&logoColor=white" />
 
 </div>
+
+## 📝 Documentos 
+
+  <div style="display: flex; justify-content: space-between;">
+    <a href="assets/Elicitação de Requisitos.pdf">
+      <img src="assets/ELR.png" alt="ELR"/>
+    </a>
+    <a href="assets/Documento de Requisitos de Software - DRS.pdf">
+      <img src="assets/DRS.png" alt="DRS" />
+    </a>
+  </div>
+
+  <a href="assets/Avaliação de Segurança - LACFAS(Infraestrutura AWS).csv">
+    <img src="assets/ciberseguranca.png" alt="Cibersegurança"/>
+  </a>
+
 
 ## 🧱 Estrutura de Pastas 
 
@@ -136,21 +152,6 @@ A arquitetura do projeto faz uso de vários serviços da AWS para garantir uma e
 └── README.md
 
 ```
-
-## 🚧 Desafios e Dificuldades
-
-Durante o desenvolvimento deste projeto, encontramos algumas dificuldades:
-
-1. **Integração de Múltiplos Serviços AWS:** A integração de serviços como Polly, Lex, S3, Rekognition, Bedrock e DynamoDB para garantir uma comunicação fluida e eficaz entre os componentes.
-
-2. **Gerenciamento de Estados do Chatbot:** Configurar e gerenciar intents e slots no Amazon Lex exigiu um planejamento cuidadoso para assegurar que as interações dos usuários fossem capturadas e processadas corretamente.
-
-3. **Processamento de Imagens com o Rekognition:** A etapa do processamento de imagens com o Rekognition na doação por exemplo, gerou diversos erros e complicações durante o processo.
-
-4. **Segurança das Credenciais:** Manter as credenciais AWS seguras e garantir que não fossem expostas durante o desenvolvimento foi uma prioridade.
-
-5. **Alinhamento com o Cliente:** O fato do desenvolvimento estar atrelado e dependente a uma pessoa de fora dificulta o processo de planejamento e criação de soluções.
-
    
 ## 👥 Contribuidores
 <table>
